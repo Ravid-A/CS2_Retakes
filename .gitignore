@@ -241,5 +241,5 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 
-# vscode
-.vscode/
+# .vscode
+.vscode/tasks.json
