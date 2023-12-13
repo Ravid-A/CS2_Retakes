@@ -242,4 +242,4 @@ ModelManifest.xml
 .fake/
 
 # .vscode
-.vscode/tasks.json
+.vscode/
