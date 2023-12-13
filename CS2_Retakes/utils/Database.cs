@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MySqlConnector;
 
-using static Retakes.Configs;
 using static Retakes.Functions;
 
 namespace Retakes;
@@ -18,7 +17,7 @@ public class Database
 
     public static void Connect(ConnectCallback callback, string entry)
     {
-        string connection_string = LoadDBConfig(entry).BuildConnectionString();
+        string connection_string = new DBConfig(entry).BuildConnectionString();
         
         MySqlConnection connection = new MySqlConnection(connection_string);
         try
