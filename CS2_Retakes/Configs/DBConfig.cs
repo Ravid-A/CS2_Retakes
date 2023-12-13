@@ -1,36 +1,36 @@
-using System.Text.Json;
 using MySqlConnector;
 
 namespace Retakes;
 
 public class DBConfig
 {
-    public string host;
-    public string database;
-    public string user;
-    public string password;
+     public ConnectionConfig Connection { get; set; } = null!;
 
-    public DBConfig(string entry)
+    public bool IsValid()
     {
-        this.host = "127.0.0.1";
-        this.database = "retakes";
-        this.user = "konlig";
-        this.password = "xBA3XhxQbx52";
-
-        //TODO load from config by entry
+        return Connection.Database != string.Empty && Connection.Host != string.Empty && Connection.User != string.Empty && Connection.Password != string.Empty && 0 < Connection.Port && Connection.Port < 65535;
     }
 
     public string BuildConnectionString()
     {
         var builder = new MySqlConnectionStringBuilder
         {
-            Database = this.database,
-            UserID = this.user,
-            Password = this.password,
-            Server = this.host,
-            Port = 3306,
+            Database = Connection.Database,
+            UserID = Connection.User,
+            Password = Connection.Password,
+            Server = Connection.Host,
+            Port = Connection.Port,
         };
 
         return builder.ConnectionString;
     }
+}
+
+public class ConnectionConfig
+{
+    public required string Host { get; init; }
+    public required string Database { get; init; }
+    public required string User { get; init; }
+    public required string Password { get; init; }
+    public required uint Port { get; init; }
 }

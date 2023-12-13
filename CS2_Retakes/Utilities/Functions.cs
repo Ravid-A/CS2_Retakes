@@ -1,10 +1,16 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Commands;
+
+using static Retakes.Core;
 
 namespace Retakes;
 
 class Functions
 {
+    public static string PREFIX { get; set; } = main_config.PREFIX;
+    public static string PREFIX_CON { get; set; } = main_config.PREFIX_CON;
+
     public static void PrintToChat(CCSPlayerController controller, string msg)
     {
         controller.PrintToChat(msg);
@@ -20,15 +26,27 @@ class Functions
         client.PrintToConsole(msg);
     }
 
-    public static void PrintToServer(string msg, ConsoleColor color = ConsoleColor.White)
+    public static void PrintToServer(string msg, ConsoleColor color = ConsoleColor.Cyan)
     {
         Console.ForegroundColor = color;
+
+        msg = $"{PREFIX_CON} {msg}";
         Console.WriteLine(msg);
         Console.ResetColor();
     }
 
     public static void ThrowError(string msg)
     {
-        Console.Error.WriteLine(msg);
+        throw new Exception(msg);
+    }
+
+    public static void ThrowError(Exception exception)
+    {
+        throw exception;
+    }
+
+    public static void ReplyToCommand(CommandInfo commandInfo, string msg)
+    {
+        commandInfo.ReplyToCommand(msg);
     }
 }

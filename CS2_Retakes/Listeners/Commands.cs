@@ -1,8 +1,6 @@
-using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 
-using static Retakes.Core;
 using static Retakes.Functions;
 
 namespace Retakes;
@@ -13,13 +11,13 @@ class Commands
     {
         if (player == null)
         {
-            PrintToServer($"{PREFIX} This command can only be executed by a player");
+            ReplyToCommand(commandinfo, $"This command can only be executed by a player");
             return;
         }
 
         if(!player.IsValid)
         {
-            PrintToServer($"{PREFIX} This command can only be executed by a valid player");
+            ReplyToCommand(commandinfo, $"This command can only be executed by a valid player");
             return;
         }
 

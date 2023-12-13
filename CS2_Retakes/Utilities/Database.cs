@@ -1,9 +1,8 @@
-using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using MySqlConnector;
 
+using static Retakes.Core;
 using static Retakes.Functions;
 
 namespace Retakes;
@@ -12,16 +11,36 @@ public class Database
 {
     private static MySqlConnection _connection = null!;
 
-    public delegate void ConnectCallback(MySqlConnection sqlConnection, Exception exception);
-    public delegate void QueryCallback(MySqlConnection sqlConnection, MySqlDataReader reader, Exception exception);
+    public delegate void ConnectCallback(MySqlConnection sqlConnection, Exception exception, dynamic data);
+    public delegate void QueryCallback(MySqlConnection sqlConnection, MySqlDataReader reader, Exception exception, dynamic data);
 
-    public static void Connect(ConnectCallback callback, string entry)
+    public Database(MySqlConnection connection)
     {
-        string connection_string = new DBConfig(entry).BuildConnectionString();
+        _connection = connection;
+    }
+
+    public static void Connect(ConnectCallback callback, DBConfig config, dynamic data = null!)
+    {
+        main_config.use_db = config.IsValid();
+
+        if(!main_config.use_db)
+        {
+            ThrowError("Invalid database config");
+            return;
+        }
+
+        string connection_string = config.BuildConnectionString();
         
-        MySqlConnection connection = new MySqlConnection(connection_string);
+            
+        if(main_config.DEBUG)
+        {
+            PrintToServer($"[SQL] Connection string: {connection_string}");
+        }
+
         try
         {
+            MySqlConnection connection = new MySqlConnection(connection_string);
+
             connection.Open();
 
             _connection = connection;
@@ -31,42 +50,62 @@ public class Database
                 if (args.CurrentState == System.Data.ConnectionState.Closed)
                 {
                     _connection = null!;
-                    ThrowError("Connection to database closed");
+                    if(main_config.DEBUG)
+                    {
+                        PrintToServer("[SQL] Connection closed");
+                    }
+                    main_config.use_db = false;
                 }
             };
 
-            callback(connection, null!);
+            callback(connection, null!, data);
         }
         catch (Exception e)
         {
-            callback(null!, e);
+            callback(null!, e, data);
+        }
+    }
+
+    public void CloseConnection()
+    {
+        if(_connection != null!)
+        {
+            _connection.Close();
         }
     }
 
     //Format function for queries, escapes the string and replaces the placeholders with the values
-    public void Format(string buffer, string query, params object[] args)
+    public string EscapeString(string buffer)
     {
-        buffer = string.Format(query, args);
-        buffer = MySqlHelper.EscapeString(buffer);
+        return MySqlHelper.EscapeString(buffer);
     }
 
-    public void Query(QueryCallback callback, string query, params object[] args)
+    public void Query(QueryCallback callback, string query, dynamic data = null!)
     {
-        query = string.Format(query, args);
-
         try 
         {
+            if (string.IsNullOrEmpty(query))
+            {
+                ThrowError("Query cannot be null or empty.");
+            }
+            
+            if(main_config.DEBUG)
+            {
+                PrintToServer($"[SQL] Query: {query}");
+            }
+
             using (MySqlCommand command = new MySqlCommand(query, _connection))
             {
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
-                    callback(_connection, reader, null!);
+                    callback(_connection, reader, null!, data);
                 }
             }
         }
         catch (Exception e)
         {
-            callback(_connection, null!, e);
+            callback(_connection, null!, e, data);
         }
     }
+
 }
