@@ -1,6 +1,6 @@
 using MySqlConnector;
 
-namespace Retakes;
+namespace Configs;
 
 public class DBConfig
 {

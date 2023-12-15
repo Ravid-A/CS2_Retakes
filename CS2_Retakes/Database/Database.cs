@@ -2,6 +2,8 @@ using System.Linq;
 
 using MySqlConnector;
 
+using Configs;
+
 using static Retakes.Core;
 using static Retakes.Functions;
 
@@ -10,6 +12,8 @@ namespace Retakes;
 public class Database
 {
     private static MySqlConnection _connection = null!;
+
+    private static bool _isConnected = false;
 
     public delegate void ConnectCallback(MySqlConnection sqlConnection, Exception exception, dynamic data);
     public delegate void QueryCallback(MySqlConnection sqlConnection, MySqlDataReader reader, Exception exception, dynamic data);
@@ -21,21 +25,7 @@ public class Database
 
     public static void Connect(ConnectCallback callback, DBConfig config, dynamic data = null!)
     {
-        main_config.use_db = config.IsValid();
-
-        if(!main_config.use_db)
-        {
-            ThrowError("Invalid database config");
-            return;
-        }
-
         string connection_string = config.BuildConnectionString();
-        
-            
-        if(main_config.DEBUG)
-        {
-            PrintToServer($"[SQL] Connection string: {connection_string}");
-        }
 
         try
         {
@@ -44,16 +34,14 @@ public class Database
             connection.Open();
 
             _connection = connection;
+            _isConnected = true;
 
             _connection.StateChange += (sender, args) =>
             {
                 if (args.CurrentState == System.Data.ConnectionState.Closed)
                 {
                     _connection = null!;
-                    if(main_config.DEBUG)
-                    {
-                        PrintToServer("[SQL] Connection closed");
-                    }
+                    _isConnected = false;
                     main_config.use_db = false;
                 }
             };
@@ -68,10 +56,12 @@ public class Database
 
     public void CloseConnection()
     {
-        if(_connection != null!)
+        if(_connection != null! && _isConnected)
         {
             _connection.Close();
         }
+        
+        _isConnected = false;
     }
 
     //Format function for queries, escapes the string and replaces the placeholders with the values
@@ -87,11 +77,6 @@ public class Database
             if (string.IsNullOrEmpty(query))
             {
                 ThrowError("Query cannot be null or empty.");
-            }
-            
-            if(main_config.DEBUG)
-            {
-                PrintToServer($"[SQL] Query: {query}");
             }
 
             using (MySqlCommand command = new MySqlCommand(query, _connection))

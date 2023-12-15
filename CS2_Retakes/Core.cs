@@ -4,6 +4,9 @@ using CounterStrikeSharp.API.Core;
 
 using MySqlConnector;
 
+using Configs;
+using Spawns;
+
 using static Retakes.Commands;
 using static Retakes.Events;
 using static Retakes.Functions;
@@ -171,11 +174,11 @@ public class Core : BasePlugin
 
         if(main_config.use_db)
         {
-            spawnPoints.LoadSpawnsFromDB(db, mapName);
+            //Load spawns from database
         }
         else
         {
-            //spawnPoints.LoadSpawnsFromFile(mapName);
+            //Load spawns from file
         }
     }
 }
