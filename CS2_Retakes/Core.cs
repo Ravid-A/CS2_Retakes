@@ -1,15 +1,17 @@
 using System.Text.Json;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
 
 using MySqlConnector;
 
 using Configs;
-using Spawns;
 
 using static Retakes.Commands;
 using static Retakes.Events;
 using static Retakes.Functions;
+
+using Spawns;
 
 namespace Retakes;
 
@@ -24,11 +26,12 @@ public class Core : BasePlugin
 
         public bool DEBUG;
 
-        public Config(string PREFIX, string PREFIX_CON, bool DEBUG = false)
+        public Config(MainConfig config)
         {
-            this.PREFIX = PREFIX;
-            this.PREFIX_CON = PREFIX_CON;
-            this.DEBUG = DEBUG;
+            PREFIX = config.prefixs.PREFIX;
+            PREFIX_CON = config.prefixs.PREFIX_CON;
+            use_db = config.use_db;
+            DEBUG = config.DEBUG;
         }
     }
 
@@ -36,8 +39,10 @@ public class Core : BasePlugin
     public override string ModuleVersion => "1.0.0";
     public override string ModuleAuthor => "Ravid";
     public override string ModuleDescription => "Retakes Plugin";
+
     public Database db = null!;   
     public static Config main_config = null!;
+
     public static SpawnPoints spawnPoints = null!;
 
     public override void Load(bool hotReload)
@@ -62,7 +67,10 @@ public class Core : BasePlugin
         // Unregister the command
         RemoveCommand("css_test", TestCommand);
 
-        db.CloseConnection();
+        if(db != null!)
+        {
+            db.CloseConnection();
+        }
     }
 
     public void OnMapStart(string mapName)
@@ -108,14 +116,26 @@ public class Core : BasePlugin
         }
     } 
 
+    public void CreateConfigsDirectory()
+    {
+        var configPath = Path.Combine(ModuleDirectory, "configs/");
+
+        if (!Directory.Exists(configPath))
+        {
+            Directory.CreateDirectory(configPath);
+        }
+    }
+
     private void LoadConfig()
     {
-        var configPath = Path.Combine(ModuleDirectory, "config.json");
+        CreateConfigsDirectory();
+
+        var configPath = Path.Combine(ModuleDirectory, "configs/config.json");
         if (!File.Exists(configPath)) CreateConfig(configPath);
 
         var config = JsonSerializer.Deserialize<MainConfig>(File.ReadAllText(configPath))!;
 
-        main_config = new Config(config.prefixs.PREFIX, config.prefixs.PREFIX_CON, config.DEBUG);
+        main_config = new Config(config);
     }
 
     private void CreateConfig(string configPath)
@@ -127,7 +147,8 @@ public class Core : BasePlugin
                 PREFIX = " \x04[Retakes]]\x01",
                 PREFIX_CON = "[Retakes]"
             },
-            DEBUG = false
+            DEBUG = false,
+            use_db = false
         };
 
         File.WriteAllText(configPath,
@@ -136,7 +157,9 @@ public class Core : BasePlugin
 
     private DBConfig LoadDBConfig()
     {
-        var configPath = Path.Combine(ModuleDirectory, "database.json");
+        CreateConfigsDirectory();
+
+        var configPath = Path.Combine(ModuleDirectory, "configs/database.json");
         if (!File.Exists(configPath)) return CreateDBConfig(configPath);
 
         var config = JsonSerializer.Deserialize<DBConfig>(File.ReadAllText(configPath))!;
@@ -178,7 +201,52 @@ public class Core : BasePlugin
         }
         else
         {
-            //Load spawns from file
+            LoadSpawnsFromFile(mapName);
         }
+    }
+
+    private void LoadSpawnsFromFile(string mapName)
+    {
+        CreateConfigsDirectory();
+
+        var configDir = Path.Combine(ModuleDirectory, $"configs/spawns");
+
+        if (!Directory.Exists(configDir))
+        {
+            Directory.CreateDirectory(configDir);
+        }
+
+        var configPath = Path.Combine(ModuleDirectory, $"configs/spawns/{mapName}.json");
+
+        if (!File.Exists(configPath)) 
+        {
+            CreateSpawnsConfig(configPath).ConvertToSpawnPoints(configPath);
+            return;
+        }
+
+        var config = JsonSerializer.Deserialize<SpawnsConfig>(File.ReadAllText(configPath))!;
+        config.ConvertToSpawnPoints(configPath);
+    }
+
+    private SpawnsConfig CreateSpawnsConfig(string configPath)
+    {
+        var config = new SpawnsConfig
+        {
+            Spawns = new List<SpawnConfig>
+            {
+                new SpawnConfig
+                {
+                    position = "",
+                    angles = "",
+                    team = (int)CsTeam.None,
+                    site = (int)Site.A
+                },
+            }
+        };
+
+        File.WriteAllText(configPath,
+            JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
+
+        return config;
     }
 }

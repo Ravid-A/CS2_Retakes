@@ -25,6 +25,11 @@ public class Database
 
     public static void Connect(ConnectCallback callback, DBConfig config, dynamic data = null!)
     {
+        if(!main_config.use_db)
+        {
+            return;
+        }
+
         if(config == null!)
         {
             ThrowError("DBConfig cannot be null.");
@@ -33,7 +38,7 @@ public class Database
 
         if(!config.IsValid())
         {
-            ThrowError("DBConfig is not valid.");
+            ThrowError("DBConfig is invalid.");
             return;
         }
 
@@ -54,7 +59,6 @@ public class Database
                 {
                     _connection = null!;
                     _isConnected = false;
-                    main_config.use_db = false;
                 }
             };
 
@@ -84,6 +88,11 @@ public class Database
 
     public void Query(QueryCallback callback, string query, dynamic data = null!)
     {
+        if(!main_config.use_db)
+        {
+            return;
+        }
+
         try 
         {
             if (string.IsNullOrEmpty(query))

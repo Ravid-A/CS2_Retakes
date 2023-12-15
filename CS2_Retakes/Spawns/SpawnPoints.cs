@@ -3,11 +3,15 @@ using CounterStrikeSharp.API.Core;
 using static Retakes.Core;
 using static Retakes.Functions;
 
+using static Configs.SpawnsConfig;
+
 namespace Spawns;
 
 public class SpawnPoints
 {
     public List<Spawn> spawns;
+
+    public string spawnsPath = string.Empty;
 
     public SpawnPoints()
     {
@@ -22,6 +26,8 @@ public class SpawnPoints
         }
 
         spawns.Add(spawn);
+
+        ConvertFromSpawnPoints();
     }
 
     public void RemoveSpawn(Spawn spawn)
@@ -32,6 +38,8 @@ public class SpawnPoints
         }
 
         spawns.Remove(spawn);
+
+        ConvertFromSpawnPoints();
     }
 
     public void RemoveSpawn(int index)
@@ -48,6 +56,8 @@ public class SpawnPoints
         }
 
         spawns.RemoveAt(index);
+
+        ConvertFromSpawnPoints();
     }
 
     public void ClearSpawns()
