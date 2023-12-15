@@ -25,6 +25,18 @@ public class Database
 
     public static void Connect(ConnectCallback callback, DBConfig config, dynamic data = null!)
     {
+        if(config == null!)
+        {
+            ThrowError("DBConfig cannot be null.");
+            return;
+        }
+
+        if(!config.IsValid())
+        {
+            ThrowError("DBConfig is not valid.");
+            return;
+        }
+
         string connection_string = config.BuildConnectionString();
 
         try
@@ -60,7 +72,7 @@ public class Database
         {
             _connection.Close();
         }
-        
+
         _isConnected = false;
     }
 
