@@ -7,7 +7,7 @@ namespace Retakes;
 
 class Commands
 {
-    public static void TestCommand(CCSPlayerController? player, CommandInfo commandinfo)
+    public static void GunsCommand(CCSPlayerController? player, CommandInfo commandinfo)
     {
         if (player == null)
         {
@@ -21,6 +21,6 @@ class Commands
             return;
         }
 
-        PrintToChat(player, $"{PREFIX} Test command");
+        
     }
 }

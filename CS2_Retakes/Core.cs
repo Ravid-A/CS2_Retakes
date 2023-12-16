@@ -12,6 +12,7 @@ using static Retakes.Events;
 using static Retakes.Functions;
 
 using Spawns;
+using Weapons;
 
 namespace Retakes;
 
@@ -43,6 +44,8 @@ public class Core : BasePlugin
     public static Database db = null!;   
     public static Config main_config = null!;
 
+    public static List<Player> players = new List<Player>();
+
     public static SpawnPoints spawnPoints = null!;
 
     public override void Load(bool hotReload)
@@ -64,8 +67,7 @@ public class Core : BasePlugin
 
     public override void Unload(bool hotReload)
     {
-        // Unregister the command
-        RemoveCommand("css_test", TestCommand);
+        UnRegisterCommands();
     }
 
     public void OnMapStart(string mapName)
@@ -77,14 +79,20 @@ public class Core : BasePlugin
 
     private void RegisterCommands()
     {
-        // Register the command
-        AddCommand("css_test", "", TestCommand);
+        //AddCommand("css_test", "", TestCommand);
+    }
+
+    private void UnRegisterCommands()
+    {
+        //RemoveCommand("css_test", TestCommand);
     }
 
     private void RegisterEvents()
     {
         // Register the event
-        RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+        RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
+        RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
+        RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
     }
 
     private void SQL_ConnectCallback(string connectionString, Exception exception, dynamic data)
@@ -225,6 +233,37 @@ public class Core : BasePlugin
         PrintToServer($"Loaded {spawnPoints.spawns.Count} spawns");
     }
 
+    public static void SQL_FetchUser_CB(MySqlDataReader reader, Exception exception, dynamic data)
+    {
+        if(exception != null!)
+        {
+            ThrowError($"Databse error, {exception.Message}");
+            return;
+        }
+
+        if(reader.HasRows)
+        {
+            while(reader.Read())
+            {
+                int t_primary = reader.GetInt32("t_primary");
+                int ct_primary = reader.GetInt32("ct_primary");
+                int secondary = reader.GetInt32("secondary");
+                GiveAWP giveAWP = (GiveAWP)reader.GetInt32("give_awp");
+
+                Player player = players[data];
+
+                player.weaponsAllocator.primaryWeapon_t = t_primary;
+                player.weaponsAllocator.primaryWeapon_ct = ct_primary;
+                player.weaponsAllocator.secondaryWeapon = secondary;
+                player.weaponsAllocator.giveAWP = giveAWP;
+            }
+        } else{
+            Player player = players[data];
+
+            db.Query(SQL_CheckForErrors, $"INSERT INTO `weapon` (`steamid`, `t_primary`, `ct_primary`, `secondary`, `give_awp`) VALUES ('{player.GetSteamID2()}', '0', '0', '0', '0')");
+        }
+    }
+
     private void LoadSpawnsFromFile(string mapName)
     {
         CreateConfigsDirectory();
@@ -268,5 +307,18 @@ public class Core : BasePlugin
             JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
 
         return config;
+    }
+
+    public static Player FindPlayer(CCSPlayerController player)
+    {
+        foreach(Player player_obj in players)
+        {
+            if(player_obj.player == player)
+            {
+                return player_obj;
+            }
+        }
+
+        return null!;
     }
 }
