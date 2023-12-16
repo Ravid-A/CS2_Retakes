@@ -6,21 +6,21 @@ using Configs;
 
 using static Retakes.Core;
 using static Retakes.Functions;
+using Spawns;
+using CounterStrikeSharp.API;
 
 namespace Retakes;
 
 public class Database
 {
-    private static MySqlConnection _connection = null!;
+    private static string _connectionString = string.Empty;
 
-    private static bool _isConnected = false;
+    public delegate void ConnectCallback(string connectionString, Exception exception, dynamic data);
+    public delegate void QueryCallback(MySqlDataReader reader, Exception exception, dynamic data);
 
-    public delegate void ConnectCallback(MySqlConnection sqlConnection, Exception exception, dynamic data);
-    public delegate void QueryCallback(MySqlConnection sqlConnection, MySqlDataReader reader, Exception exception, dynamic data);
-
-    public Database(MySqlConnection connection)
+    public Database(string connectionString)
     {
-        _connection = connection;
+        _connectionString = connectionString;
     }
 
     public static void Connect(ConnectCallback callback, DBConfig config, dynamic data = null!)
@@ -42,42 +42,22 @@ public class Database
             return;
         }
 
-        string connection_string = config.BuildConnectionString();
+        _connectionString = config.BuildConnectionString();
 
         try
         {
-            MySqlConnection connection = new MySqlConnection(connection_string);
+            MySqlConnection connection = new MySqlConnection(_connectionString);
 
             connection.Open();
 
-            _connection = connection;
-            _isConnected = true;
+            callback(_connectionString, null!, data);
 
-            _connection.StateChange += (sender, args) =>
-            {
-                if (args.CurrentState == System.Data.ConnectionState.Closed)
-                {
-                    _connection = null!;
-                    _isConnected = false;
-                }
-            };
-
-            callback(connection, null!, data);
+            connection.Close();
         }
         catch (Exception e)
         {
             callback(null!, e, data);
         }
-    }
-
-    public void CloseConnection()
-    {
-        if(_connection != null! && _isConnected)
-        {
-            _connection.Close();
-        }
-
-        _isConnected = false;
     }
 
     //Format function for queries, escapes the string and replaces the placeholders with the values
@@ -100,18 +80,79 @@ public class Database
                 ThrowError("Query cannot be null or empty.");
             }
 
-            using (MySqlCommand command = new MySqlCommand(query, _connection))
+            using(MySqlConnection connection = new MySqlConnection(_connectionString))
             {
-                using (MySqlDataReader reader = command.ExecuteReader())
+                connection.Open();
+
+                using(MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    callback(_connection, reader, null!, data);
+                    using(MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        callback(reader, null!, data);
+                    }
                 }
+
+                connection.Close();
             }
         }
         catch (Exception e)
         {
-            callback(_connection, null!, e, data);
+            callback(null!, e, data);
         }
     }
 
+
+    public void InsertSpawn(Spawn spawn, int index)
+    {
+        if(!main_config.use_db)
+        {
+            return;
+        }
+
+        if(index < 0 || index > spawnPoints.spawns.Count)
+        {
+            ThrowError($"Invalid spawn index: {index}");
+            return;
+        }
+
+        string mapName = Server.MapName;
+
+        string query = $"INSERT INTO `spawns` (`map`, `position`, `angles`, `team`, `site`) VALUES ('{mapName}', '{spawn.position}', '{spawn.angles}', '{(int)spawn.team}', '{(int)spawn.site}');";
+        query += "SELECT LAST_INSERT_ID() as id;";
+
+        Query(SQL_InserRow_CB, query);
+    }
+
+    private void SQL_InserRow_CB(MySqlDataReader reader, Exception exception, dynamic data)
+    {
+        if(exception != null!)
+        {
+            ThrowError($"Databse error, {exception.Message}");
+            return;
+        }
+
+        if(reader.HasRows)
+        {
+            while(reader.Read())
+            {
+                int id = reader.GetInt32("id");
+
+                spawnPoints.spawns[data].id = id;
+            }
+        }
+    }
+
+    public void DeleteSpawn(Spawn spawn)
+    {
+        if(!main_config.use_db)
+        {
+            return;
+        }
+
+        string mapName = Server.MapName;
+
+        string query = $"DELETE FROM `spawns` WHERE `id` = '{spawn.id}' AND `map` = '{mapName}'";
+
+        Query(SQL_CheckForErrors, query);
+    }
 }

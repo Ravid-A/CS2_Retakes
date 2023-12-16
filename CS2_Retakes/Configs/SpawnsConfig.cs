@@ -3,6 +3,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 using Spawns;
 
 using static Retakes.Core;
+using static Retakes.Functions;
 
 namespace Configs;
 
@@ -14,18 +15,19 @@ public class SpawnsConfig
     {
         spawnPoints.spawnsPath = configpath;
 
+        int counter = 0;
+
         foreach (var spawn in Spawns)
         {
             if(spawn.position == string.Empty || spawn.angles == string.Empty)
             {
-                Console.WriteLine($"Invalid spawn: Position: \"{spawn.position}\", Angles: \"{spawn.angles}\", Team: {spawn.team}, Site: {spawn.site} | SKIPPING...");
-                continue;
+                PrintToServer($"Invalid spawn: Position: \"{spawn.position}\", Angles: \"{spawn.angles}\", Team: {spawn.team}, Site: {spawn.site} | SKIPPING...", ConsoleColor.Red);
             }
 
-            spawnPoints.AddSpawn(new Spawn(spawn.position, spawn.angles, spawn.team, spawn.site));
+            spawnPoints.AddSpawn(new Spawn(counter++, spawn.position, spawn.angles, spawn.team, spawn.site));
         }
 
-        Console.WriteLine($"Loaded {spawnPoints.spawns.Count} spawns");
+        PrintToServer($"Loaded {spawnPoints.spawns.Count} spawns");
     }
 
     public static void ConvertFromSpawnPoints()

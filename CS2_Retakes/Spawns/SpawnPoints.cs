@@ -18,7 +18,9 @@ public class SpawnPoints
         spawns = new List<Spawn>();
     }
 
-    public void AddSpawn(Spawn spawn)
+    public int Length => spawns.Count;
+
+    public void AddSpawn(Spawn spawn, bool insert = false)
     {
         if(main_config.DEBUG)
         {
@@ -27,7 +29,18 @@ public class SpawnPoints
 
         spawns.Add(spawn);
 
-        ConvertFromSpawnPoints();
+        if(insert)
+        {
+            int index = spawns.IndexOf(spawn);
+
+            if(main_config.use_db)
+            {
+                db.InsertSpawn(spawn, index);
+                return;
+            }
+
+            ConvertFromSpawnPoints();
+        }
     }
 
     public void RemoveSpawn(Spawn spawn)
@@ -38,6 +51,12 @@ public class SpawnPoints
         }
 
         spawns.Remove(spawn);
+
+        if(main_config.use_db)
+        {
+            db.DeleteSpawn(spawn);
+            return;
+        }
 
         ConvertFromSpawnPoints();
     }
@@ -55,7 +74,15 @@ public class SpawnPoints
             PrintToServer($"Removing spawn: {spawns[index].position} {spawns[index].angles} {spawns[index].team} {spawns[index].site}");
         }
 
+        Spawn spawn = spawns[index];
+
         spawns.RemoveAt(index);
+
+        if(main_config.use_db)
+        {
+            db.DeleteSpawn(spawn);
+            return;
+        }
 
         ConvertFromSpawnPoints();
     }

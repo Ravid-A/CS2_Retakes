@@ -40,7 +40,7 @@ public class Core : BasePlugin
     public override string ModuleAuthor => "Ravid";
     public override string ModuleDescription => "Retakes Plugin";
 
-    public Database db = null!;   
+    public static Database db = null!;   
     public static Config main_config = null!;
 
     public static SpawnPoints spawnPoints = null!;
@@ -66,11 +66,6 @@ public class Core : BasePlugin
     {
         // Unregister the command
         RemoveCommand("css_test", TestCommand);
-
-        if(db != null!)
-        {
-            db.CloseConnection();
-        }
     }
 
     public void OnMapStart(string mapName)
@@ -92,22 +87,22 @@ public class Core : BasePlugin
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
     }
 
-    private void SQL_ConnectCallback(MySqlConnection sqlConnection, Exception exception, dynamic data)
+    private void SQL_ConnectCallback(string connectionString, Exception exception, dynamic data)
     {
-        if(sqlConnection == null!)
+        if(connectionString == null!)
         {
             ThrowError($"Failed to connect to database: {exception.Message}");
             return;
         }
 
-        db = new Database(sqlConnection);
+        db = new Database(connectionString);
 
         PrintToServer($"Connected to database");
 
         db.Query(SQL_CheckForErrors, "CREATE TABLE IF NOT EXISTS `spawns` (`id` INT NOT NULL AUTO_INCREMENT, `map` VARCHAR(128) NOT NULL, `position` VARCHAR(64) NOT NULL, `angles` VARCHAR(64) NOT NULL, `team` INT NOT NULL, `site` INT NOT NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;");
     }
 
-    private void SQL_CheckForErrors(MySqlConnection sqlConnection, MySqlDataReader reader, Exception exception, dynamic data)
+    public static void SQL_CheckForErrors(MySqlDataReader reader, Exception exception, dynamic data)
     {
         if(exception != null!)
         {
@@ -197,12 +192,37 @@ public class Core : BasePlugin
 
         if(main_config.use_db)
         {
-            //Load spawns from database
+            db.Query(SQL_LoadSpawns_CB, $"SELECT * FROM `spawns` WHERE `map` = '{mapName}'");
         }
         else
         {
             LoadSpawnsFromFile(mapName);
         }
+    }
+
+    private void SQL_LoadSpawns_CB(MySqlDataReader reader, Exception exception, dynamic data)
+    {
+        if(exception != null!)
+        {
+            ThrowError($"Databse error, {exception.Message}");
+            return;
+        }
+
+        if(reader.HasRows)
+        {
+            while(reader.Read())
+            {
+                int id = reader.GetInt32("id");
+                string position = reader.GetString("position");
+                string angles = reader.GetString("angles");
+                int team = reader.GetInt32("team");
+                int site = reader.GetInt32("site");
+
+                spawnPoints.AddSpawn(new Spawn(id, position, angles, team, site));
+            }
+        }
+
+        PrintToServer($"Loaded {spawnPoints.spawns.Count} spawns");
     }
 
     private void LoadSpawnsFromFile(string mapName)
