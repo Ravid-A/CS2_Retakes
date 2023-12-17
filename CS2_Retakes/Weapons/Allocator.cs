@@ -4,6 +4,8 @@ using CounterStrikeSharp.API.Modules.Entities;
 
 namespace Weapons;
 
+using static Retakes.Functions;
+
 public enum GiveAWP
 {
     NEVER,
@@ -27,6 +29,13 @@ public class Weapon
 
 public class WeaponsAllocator
 {
+    public enum WeaponType
+    {
+        PRIMARY_T,
+        PRIMARY_CT,
+        SECONDARY
+    };
+
     public static Weapon[] primary_t =
     {
         new Weapon("weapon_ak47", "AK-47"),
@@ -43,7 +52,6 @@ public class WeaponsAllocator
     public static Weapon[] pistols = 
     {
         new Weapon("weapon_glock", "Glock-18"),
-        new Weapon("weapon_hkp2000", "P2000"),
         new Weapon("weapon_usp_silencer", "USP-S"),
         new Weapon("weapon_p250", "P250"),
         new Weapon("weapon_tec9", "Tec-9"),
@@ -62,6 +70,48 @@ public class WeaponsAllocator
     public WeaponsAllocator(CCSPlayerController player)
     {
         this.player = player;
+    }
+
+    public static int GetWeaponIndex(string weapon, WeaponType type)
+    {
+        switch(type)
+        {
+            case WeaponType.PRIMARY_T:
+            {
+                for(int i = 0; i < primary_t.Length; i++)
+                {
+                    if(primary_t[i].display_name == weapon)
+                    {
+                        return i;
+                    }
+                }
+                break;
+            }
+            case WeaponType.PRIMARY_CT:
+            {
+                for(int i = 0; i < primary_ct.Length; i++)
+                {
+                    if(primary_ct[i].display_name == weapon)
+                    {
+                        return i;
+                    }
+                }
+                break;
+            }
+            case WeaponType.SECONDARY:
+            {
+                for(int i = 0; i < pistols.Length; i++)
+                {
+                    if(pistols[i].display_name == weapon)
+                    {
+                        return i;
+                    }
+                }
+                break;
+            }
+        }
+
+        return -1;
     }
 
     public bool Allocate(bool give_awp)
@@ -116,6 +166,7 @@ public class WeaponsAllocator
         player.RemoveWeapons();
         player.GiveNamedItem(primary);
         player.GiveNamedItem(secondary);
+        player.GiveNamedItem("weapon_knife");
 
         return gave_awp;
     }

@@ -7,8 +7,9 @@ using MySqlConnector;
 
 using Configs;
 
-using static Retakes.Commands;
-using static Retakes.Events;
+using static Retakes.CommandsHandlers;
+using static Retakes.EventsHandlers;
+using static Retakes.ListenersHandlers;
 using static Retakes.Functions;
 
 using Spawns;
@@ -23,6 +24,8 @@ public class Core : BasePlugin
         public string PREFIX;
         public string PREFIX_CON;
 
+        public string PREFIX_MENU;
+
         public bool use_db = false;
 
         public bool DEBUG;
@@ -31,6 +34,7 @@ public class Core : BasePlugin
         {
             PREFIX = config.prefixs.PREFIX;
             PREFIX_CON = config.prefixs.PREFIX_CON;
+            PREFIX_MENU = config.prefixs.PREFIX_MENU;
             use_db = config.use_db;
             DEBUG = config.DEBUG;
         }
@@ -41,12 +45,26 @@ public class Core : BasePlugin
     public override string ModuleAuthor => "Ravid";
     public override string ModuleDescription => "Retakes Plugin";
 
+    static CCSGameRules? _gameRules = null;
+    static void SetGameRules() => _gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
+
     public static Database db = null!;   
     public static Config main_config = null!;
 
     public static List<Player> players = new List<Player>();
 
     public static SpawnPoints spawnPoints = null!;
+
+    public static bool WarmupRunning
+    {
+        get
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            return _gameRules is not null && _gameRules.WarmupPeriod;
+        }
+    }
 
     public override void Load(bool hotReload)
     {
@@ -56,12 +74,16 @@ public class Core : BasePlugin
 
         RegisterCommands();
         RegisterEvents();
-
-        RegisterListener<Listeners.OnMapStart>(OnMapStart);
+        RegisterListeners();
 
         if(hotReload)
         {
             OnMapStart(Server.MapName);
+
+            Utilities.GetPlayers().ForEach(player =>
+            {
+                AddPlayerToList(player);
+            });
         }
     }
 
@@ -79,20 +101,25 @@ public class Core : BasePlugin
 
     private void RegisterCommands()
     {
-        //AddCommand("css_test", "", TestCommand);
+        AddCommand("css_guns", "Opens the guns menu", GunsCommand);
     }
 
     private void UnRegisterCommands()
     {
-        //RemoveCommand("css_test", TestCommand);
+        RemoveCommand("css_guns", GunsCommand);
     }
 
     private void RegisterEvents()
     {
-        // Register the event
-        RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
-        RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
-        RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
+        //RegisterEventHandler<EventRoundPrestart>(OnRoundPreStart);
+        RegisterEventHandler<EventRoundStart>(OnRoundStart);
+    }
+
+    private void RegisterListeners()
+    {
+        RegisterListener<Listeners.OnMapStart>(OnMapStart);
+        RegisterListener<Listeners.OnClientConnected>(OnClientConnected);
+        RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnect);
     }
 
     private void SQL_ConnectCallback(string connectionString, Exception exception, dynamic data)
@@ -107,7 +134,7 @@ public class Core : BasePlugin
 
         PrintToServer($"Connected to database");
 
-        db.Query(SQL_CheckForErrors, "CREATE TABLE IF NOT EXISTS `spawns` (`id` INT NOT NULL AUTO_INCREMENT, `map` VARCHAR(128) NOT NULL, `position` VARCHAR(64) NOT NULL, `angles` VARCHAR(64) NOT NULL, `team` INT NOT NULL, `site` INT NOT NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;");
+        db.CreateTables();
     }
 
     public static void SQL_CheckForErrors(MySqlDataReader reader, Exception exception, dynamic data)
@@ -148,7 +175,8 @@ public class Core : BasePlugin
             prefixs = new PREFIXS
             {
                 PREFIX = " \x04[Retakes]]\x01",
-                PREFIX_CON = "[Retakes]"
+                PREFIX_CON = "[Retakes]",
+                PREFIX_MENU = " \x04[Retakes]]\x01"
             },
             DEBUG = false,
             use_db = false
@@ -260,7 +288,7 @@ public class Core : BasePlugin
         } else{
             Player player = players[data];
 
-            db.Query(SQL_CheckForErrors, $"INSERT INTO `weapon` (`steamid`, `t_primary`, `ct_primary`, `secondary`, `give_awp`) VALUES ('{player.GetSteamID2()}', '0', '0', '0', '0')");
+            db.Query(SQL_CheckForErrors, $"INSERT INTO `weapons` (`auth`, `name`, `t_primary`, `ct_primary`, `secondary`, `give_awp`) VALUES ('{player.GetSteamID2()}', '{player.GetName()}' , '0', '0', '0', '0')");
         }
     }
 
@@ -307,18 +335,5 @@ public class Core : BasePlugin
             JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
 
         return config;
-    }
-
-    public static Player FindPlayer(CCSPlayerController player)
-    {
-        foreach(Player player_obj in players)
-        {
-            if(player_obj.player == player)
-            {
-                return player_obj;
-            }
-        }
-
-        return null!;
     }
 }

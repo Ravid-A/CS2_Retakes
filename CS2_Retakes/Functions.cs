@@ -11,6 +11,8 @@ class Functions
     public static string PREFIX { get; set; } = main_config.PREFIX;
     public static string PREFIX_CON { get; set; } = main_config.PREFIX_CON;
 
+    public static string PREFIX_MENU { get; set; } = main_config.PREFIX_MENU;
+
     public static void PrintToChat(CCSPlayerController controller, string msg)
     {
         controller.PrintToChat(msg);
@@ -48,5 +50,18 @@ class Functions
     public static void ReplyToCommand(CommandInfo commandInfo, string msg)
     {
         commandInfo.ReplyToCommand(msg);
+    }
+
+    public static Player FindPlayer(CCSPlayerController player)
+    {
+        foreach(Player player_obj in players)
+        {
+            if(player_obj.player == player)
+            {
+                return player_obj;
+            }
+        }
+
+        return null!;
     }
 }

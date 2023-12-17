@@ -3,9 +3,11 @@ using CounterStrikeSharp.API.Modules.Commands;
 
 using static Retakes.Functions;
 
+using static Weapons.WeaponsMenu;
+
 namespace Retakes;
 
-class Commands
+class CommandsHandlers
 {
     public static void GunsCommand(CCSPlayerController? player, CommandInfo commandinfo)
     {
@@ -21,6 +23,21 @@ class Commands
             return;
         }
 
-        
+        Player player_obj = FindPlayer(player);
+
+        if(player_obj == null!)
+        {
+            return;
+        }
+
+        if(player_obj.inGunMenu)
+        {
+            ReplyToCommand(commandinfo, $"You are already in the gun menu!");
+            return;
+        }
+
+        player_obj.inGunMenu = true;
+
+        OpenTPrimaryMenu(player);
     }
 }

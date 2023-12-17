@@ -1,65 +1,36 @@
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 
-using MySqlConnector;
-
 using static Retakes.Core;
+using static Retakes.Functions;
+
+using static Retakes.Player;
 
 namespace Retakes;
 
-class Events
+class EventsHandlers
 {
-    public static HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
+
+    public static HookResult OnRoundPreStart(EventRoundPrestart @event, GameEventInfo info)
     {
-        CCSPlayerController player_controller = @event.Userid;
-
-        if(!player_controller.IsValid)
+        if(WarmupRunning)
         {
             return HookResult.Continue;
         }
 
-        Player player = new Player(player_controller);
-
-        players.Add(player);
-
-        int index = players.IndexOf(player);
-
-        db.Query(SQL_FetchUser_CB, $"SELECT * FROM `weapon` WHERE `steamid` = '{player.GetSteamID2()}'", index);
-        return HookResult.Continue;
-    }
-
-    public static HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
-    {
-        CCSPlayerController player = @event.Userid;
-
-        if(!player.IsValid)
-        {
-            return HookResult.Continue;
-        }
-
-        Player player_obj = FindPlayer(player);
-
-        if(player_obj == null!)
-        {
-            return HookResult.Continue;
-        }
-
-        players.Remove(player_obj);
-
-        db.Query(SQL_CheckForErrors, $"UPDATE `weapon` SET `t_primary` = '{player_obj.weaponsAllocator.primaryWeapon_t}', `ct_primary` = '{player_obj.weaponsAllocator.primaryWeapon_ct}', `secondary` = '{player_obj.weaponsAllocator.secondaryWeapon}', `give_awp` = '{(int)player_obj.weaponsAllocator.giveAWP}' WHERE `steamid` = '{player_obj.GetSteamID2()}'");
+        Server.ExecuteCommand("mp_buy_anywhere 0");
+        Server.ExecuteCommand("mp_buytime 0");
+        Server.ExecuteCommand("mp_startmoney 0");
 
         return HookResult.Continue;
     }
 
-    public static HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
+    public static HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
-        CCSPlayerController player = @event.Userid;
-
-        if(!player.IsValid)
+        if(!WarmupRunning)
         {
-            return HookResult.Continue;
+            AllocateWeapons(players);
         }
-
-        
 
         return HookResult.Continue;
     }

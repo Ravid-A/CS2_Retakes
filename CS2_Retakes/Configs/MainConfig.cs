@@ -11,4 +11,5 @@ public class PREFIXS
 {
     public required string PREFIX { get; init; }
     public required string PREFIX_CON { get; init; }
+    public required string PREFIX_MENU { get; init; }
 }
