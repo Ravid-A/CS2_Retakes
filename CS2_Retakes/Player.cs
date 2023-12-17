@@ -1,4 +1,5 @@
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using Weapons;
 
@@ -18,8 +19,6 @@ public class Player
     public bool bombOwner = false;
 
     public bool bombPlanted = false;
-
-
 
     public Player(CCSPlayerController player)
     {
@@ -48,6 +47,21 @@ public class Player
     public CsTeam GetTeam()
     {
         return (CsTeam)player.TeamNum;
+    }
+
+    public SteamID? GetSteamID()
+    {
+        if(player == null! || !player.IsValid)
+        {
+            return null!;
+        }
+
+        if(player.AuthorizedSteamID == null!)
+        {
+            return null!;
+        }
+
+        return player.AuthorizedSteamID;
     }
 
     public string GetSteamID2()

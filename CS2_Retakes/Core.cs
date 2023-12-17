@@ -102,11 +102,13 @@ public class Core : BasePlugin
     private void RegisterCommands()
     {
         AddCommand("css_guns", "Opens the guns menu", GunsCommand);
+        AddCommand("css_addspawn", "Adds a spawn", AddSpawnCommand);
     }
 
     private void UnRegisterCommands()
     {
         RemoveCommand("css_guns", GunsCommand);
+        RemoveCommand("css_addspawn", AddSpawnCommand);
     }
 
     private void RegisterEvents()

@@ -20,6 +20,17 @@ public class SpawnPoints
 
     public int Length => spawns.Count;
 
+    public void SetSpawnId(int index, int id)
+    {
+        if(index < 0 || index > spawns.Count)
+        {
+            ThrowError($"Invalid spawn index: {index}");
+            return;
+        }
+
+        spawns[index].id = id;
+    }
+
     public void AddSpawn(Spawn spawn, bool insert = false)
     {
         if(main_config.DEBUG)

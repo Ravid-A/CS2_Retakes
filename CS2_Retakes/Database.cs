@@ -133,7 +133,7 @@ public class Database
         string query = $"INSERT INTO `spawns` (`map`, `position`, `angles`, `team`, `site`) VALUES ('{mapName}', '{spawn.position}', '{spawn.angles}', '{(int)spawn.team}', '{(int)spawn.site}');";
         query += "SELECT LAST_INSERT_ID() as id;";
 
-        Query(SQL_InserRow_CB, query);
+        Query(SQL_InserRow_CB, query, index);
     }
 
     private void SQL_InserRow_CB(MySqlDataReader reader, Exception exception, dynamic data)
@@ -144,13 +144,21 @@ public class Database
             return;
         }
 
+        int index = data;
+
+        if(index < 0 || index > spawnPoints.spawns.Count)
+        {
+            ThrowError($"Invalid spawn index: {index}");
+            return;
+        }
+
         if(reader.HasRows)
         {
             while(reader.Read())
             {
                 int id = reader.GetInt32("id");
 
-                spawnPoints.spawns[data].id = id;
+                spawnPoints.SetSpawnId(index, id);
             }
         }
     }
