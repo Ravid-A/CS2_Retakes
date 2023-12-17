@@ -1,5 +1,7 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Attributes;
+using CounterStrikeSharp.API.Modules.Entities;
 
 using static Retakes.Core;
 using static Retakes.Functions;
@@ -8,7 +10,7 @@ namespace Retakes;
 
 class ListenersHandlers
 {
-    public static void OnClientConnected(int playerSlot)
+    public static void OnClientAuthorized(int playerSlot, [CastFrom(typeof(ulong))] SteamID steamId)
     {
         CCSPlayerController player = Utilities.GetPlayerFromSlot(playerSlot);
         AddPlayerToList(player);
