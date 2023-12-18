@@ -64,4 +64,23 @@ class Functions
 
         return null!;
     }
+
+    public static int FindPlayer(Player player)
+    {
+        return players.IndexOf(player);
+    }
+
+    public static void ServerCommand(string command, params object[] args)
+    {
+        Server.ExecuteCommand(string.Format(command, args));
+    }
+
+    public static void StartTimedWarmup(int time) 
+    {
+        ServerCommand("mp_do_warmup_period 1");
+        ServerCommand("mp_warmup_pausetimer 0");
+        ServerCommand($"mp_warmuptime {time}");
+        ServerCommand("mp_warmup_start");
+        ServerCommand("mp_warmup_start"); // don't ask.
+    }
 }

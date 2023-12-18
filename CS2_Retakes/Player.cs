@@ -1,14 +1,17 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
+
 using Weapons;
 
+using static Retakes.Core;
 using static Retakes.Functions;
 
 namespace Retakes;
 
 public class Player
 {
+    public int index => FindPlayer(this);
 
     public CCSPlayerController player;
 
@@ -16,9 +19,9 @@ public class Player
 
     public bool inGunMenu = false;
 
-    public bool bombOwner = false;
+    public int roundPoints = 0;
 
-    public bool bombPlanted = false;
+    public bool isBomberOwner => index == bombOwner;
 
     public Player(CCSPlayerController player)
     {
@@ -26,7 +29,7 @@ public class Player
         weaponsAllocator = new WeaponsAllocator(player);
     }
 
-    public static void AllocateWeapons(List<Player> players)
+    public static void SetupPlayers(List<Player> players)
     {
         bool giveawp_t = true;
         bool giveawp_ct = true;
@@ -34,12 +37,23 @@ public class Player
         foreach(Player player in players)
         {
             CsTeam team = player.GetTeam();
-            if(team == CsTeam.Terrorist)
-            {
-                giveawp_t = !player.weaponsAllocator.Allocate(giveawp_t);
+            bool giveawp = player.weaponsAllocator.SetupGiveAwp();
 
-            } else if (team == CsTeam.CounterTerrorist) {
-                giveawp_ct = !player.weaponsAllocator.Allocate(giveawp_ct);
+            player.weaponsAllocator.give_awp = false;
+
+            if(giveawp)
+            {
+                if(team == CsTeam.Terrorist && giveawp_t)
+                {
+                    player.weaponsAllocator.give_awp = true;
+                    giveawp_t = false;
+                }
+
+                if(team == CsTeam.CounterTerrorist && giveawp_ct)
+                {
+                    player.weaponsAllocator.give_awp = true;
+                    giveawp_ct = false;
+                }
             }
         }
     }
@@ -87,5 +101,36 @@ public class Player
         }
 
         return player.PlayerName;
+    }
+
+    public bool IsValid()
+    {
+        return !(player == null! || !player.IsValid);
+    }
+
+    public void CreateSpawnDelay()
+    {
+        _plugin.AddTimer(1f, Timer_StartPlant);
+        _plugin.AddTimer(.05f, Timer_GiveWeapons);
+    }
+
+    private void Timer_StartPlant()
+    {
+        if(!isLive())
+        {
+            return;
+        }
+
+        isBombPlantSignal = true;
+    }
+
+    private void Timer_GiveWeapons()
+    {
+        if(!isLive())
+        {
+            return;
+        }
+
+        weaponsAllocator.Allocate(isBomberOwner);
     }
 }

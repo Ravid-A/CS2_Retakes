@@ -1,21 +1,27 @@
-using System.Text.Json;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Utils;
 
 using MySqlConnector;
 
 using Configs;
+using static Configs.Configs;
 
 using static Retakes.CommandsHandlers;
 using static Retakes.EventsHandlers;
 using static Retakes.ListenersHandlers;
 using static Retakes.Functions;
+using static Retakes.Database;
 
 using Spawns;
 using Weapons;
 
 namespace Retakes;
+
+public enum Site
+{
+    A,
+    B
+}
 
 public class Core : BasePlugin
 {
@@ -28,6 +34,9 @@ public class Core : BasePlugin
 
         public bool use_db = false;
 
+        public int WARMUP_TIME = 12;
+        public int MAX_PLAYERS = 9;
+
         public bool DEBUG;
 
         public Config(MainConfig config)
@@ -37,8 +46,12 @@ public class Core : BasePlugin
             PREFIX_MENU = config.prefixs.PREFIX_MENU;
             use_db = config.use_db;
             DEBUG = config.DEBUG;
+            WARMUP_TIME = config.WARMUP_TIME;
+            MAX_PLAYERS = config.MAX_PLAYERS;
         }
     }
+
+    public static Core _plugin = null!;
 
     public override string ModuleName => "Retakes Plugin";
     public override string ModuleVersion => "1.0.0";
@@ -46,16 +59,24 @@ public class Core : BasePlugin
     public override string ModuleDescription => "Retakes Plugin";
 
     static CCSGameRules? _gameRules = null;
-    static void SetGameRules() => _gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
+    static void SetGameRules()
+    {
+        var gameRulesEntities = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules");
+
+        if (gameRulesEntities.Any())
+        {
+            _gameRules = gameRulesEntities.First().GameRules!;
+        }
+    }
 
     public static Database db = null!;   
     public static Config main_config = null!;
-
     public static List<Player> players = new List<Player>();
-
     public static SpawnPoints spawnPoints = null!;
+    public static List<Spawn> selectedSpawns = new List<Spawn>();
+    public static Site currentSite = Site.A;
 
-    public static bool WarmupRunning
+    private static bool WarmupRunning
     {
         get
         {
@@ -66,11 +87,17 @@ public class Core : BasePlugin
         }
     }
 
+    public static bool isBombPlanted = false;
+    public static bool isBombPlantSignal = false;
+    public static int bombOwner = -1;
+
     public override void Load(bool hotReload)
     {
+        _plugin = this;
+
         LoadConfig();
 
-        Database.Connect(SQL_ConnectCallback, LoadDBConfig());
+        Connect(SQL_ConnectCallback, LoadDBConfig());
 
         RegisterCommands();
         RegisterEvents();
@@ -80,10 +107,7 @@ public class Core : BasePlugin
         {
             OnMapStart(Server.MapName);
 
-            Utilities.GetPlayers().ForEach(player =>
-            {
-                AddPlayerToList(player);
-            });
+            Utilities.GetPlayers().ForEach(AddPlayerToList);
         }
     }
 
@@ -92,36 +116,9 @@ public class Core : BasePlugin
         UnRegisterCommands();
     }
 
-    public void OnMapStart(string mapName)
+    public static bool isLive()
     {
-        PrintToServer($"Map started: {mapName}");
-
-        LoadSpawns(mapName);
-    }
-
-    private void RegisterCommands()
-    {
-        AddCommand("css_guns", "Opens the guns menu", GunsCommand);
-        AddCommand("css_addspawn", "Adds a spawn", AddSpawnCommand);
-    }
-
-    private void UnRegisterCommands()
-    {
-        RemoveCommand("css_guns", GunsCommand);
-        RemoveCommand("css_addspawn", AddSpawnCommand);
-    }
-
-    private void RegisterEvents()
-    {
-        //RegisterEventHandler<EventRoundPrestart>(OnRoundPreStart);
-        RegisterEventHandler<EventRoundStart>(OnRoundStart);
-    }
-
-    private void RegisterListeners()
-    {
-        RegisterListener<Listeners.OnMapStart>(OnMapStart);
-        RegisterListener<Listeners.OnClientAuthorized>(OnClientAuthorized);
-        RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnect);
+        return !WarmupRunning;
     }
 
     private void SQL_ConnectCallback(string connectionString, Exception exception, dynamic data)
@@ -139,106 +136,7 @@ public class Core : BasePlugin
         db.CreateTables();
     }
 
-    public static void SQL_CheckForErrors(MySqlDataReader reader, Exception exception, dynamic data)
-    {
-        if(exception != null!)
-        {
-            ThrowError($"Databse error, {exception.Message}");
-            return;
-        }
-    } 
-
-    public void CreateConfigsDirectory()
-    {
-        var configPath = Path.Combine(ModuleDirectory, "configs/");
-
-        if (!Directory.Exists(configPath))
-        {
-            Directory.CreateDirectory(configPath);
-        }
-    }
-
-    private void LoadConfig()
-    {
-        CreateConfigsDirectory();
-
-        var configPath = Path.Combine(ModuleDirectory, "configs/config.json");
-        if (!File.Exists(configPath)) CreateConfig(configPath);
-
-        var config = JsonSerializer.Deserialize<MainConfig>(File.ReadAllText(configPath))!;
-
-        main_config = new Config(config);
-    }
-
-    private void CreateConfig(string configPath)
-    {
-        var config = new MainConfig
-        {
-            prefixs = new PREFIXS
-            {
-                PREFIX = " \x04[Retakes]]\x01",
-                PREFIX_CON = "[Retakes]",
-                PREFIX_MENU = " \x04[Retakes]]\x01"
-            },
-            DEBUG = false,
-            use_db = false
-        };
-
-        File.WriteAllText(configPath,
-            JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
-    }
-
-    private DBConfig LoadDBConfig()
-    {
-        CreateConfigsDirectory();
-
-        var configPath = Path.Combine(ModuleDirectory, "configs/database.json");
-        if (!File.Exists(configPath)) return CreateDBConfig(configPath);
-
-        var config = JsonSerializer.Deserialize<DBConfig>(File.ReadAllText(configPath))!;
-
-        return config;
-    }
-
-    private DBConfig CreateDBConfig(string configPath)
-    {
-        var config = new DBConfig
-        {
-            Connection = new ConnectionConfig
-            {
-                Host = "",
-                Database = "",
-                User = "",
-                Password = "",
-                Port = 3306
-            }
-        };
-
-        File.WriteAllText(configPath,
-            JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
-        return config;
-    }
-
-    public void LoadSpawns(string mapName)
-    {
-        if(spawnPoints == null!)
-        {
-            spawnPoints = new SpawnPoints();
-        }
-
-        spawnPoints.ClearSpawns();
-
-        if(main_config.use_db)
-        {
-            db.Query(SQL_LoadSpawns_CB, $"SELECT * FROM `spawns` WHERE `map` = '{mapName}'");
-        }
-        else
-        {
-            LoadSpawnsFromFile(mapName);
-        }
-    }
-
-    private void SQL_LoadSpawns_CB(MySqlDataReader reader, Exception exception, dynamic data)
+    public static void SQL_LoadSpawns_CB(MySqlDataReader reader, Exception exception, dynamic data)
     {
         if(exception != null!)
         {
@@ -255,8 +153,9 @@ public class Core : BasePlugin
                 string angles = reader.GetString("angles");
                 int team = reader.GetInt32("team");
                 int site = reader.GetInt32("site");
+                bool isBombsite = reader.GetBoolean("is_bombsite");
 
-                spawnPoints.AddSpawn(new Spawn(id, position, angles, team, site));
+                spawnPoints.AddSpawn(new Spawn(id, position, angles, team, site, isBombsite));
             }
         }
 
@@ -292,50 +191,5 @@ public class Core : BasePlugin
 
             db.Query(SQL_CheckForErrors, $"INSERT INTO `weapons` (`auth`, `name`, `t_primary`, `ct_primary`, `secondary`, `give_awp`) VALUES ('{player.GetSteamID2()}', '{player.GetName()}' , '0', '0', '0', '0')");
         }
-    }
-
-    private void LoadSpawnsFromFile(string mapName)
-    {
-        CreateConfigsDirectory();
-
-        var configDir = Path.Combine(ModuleDirectory, $"configs/spawns");
-
-        if (!Directory.Exists(configDir))
-        {
-            Directory.CreateDirectory(configDir);
-        }
-
-        var configPath = Path.Combine(ModuleDirectory, $"configs/spawns/{mapName}.json");
-
-        if (!File.Exists(configPath)) 
-        {
-            CreateSpawnsConfig(configPath).ConvertToSpawnPoints(configPath);
-            return;
-        }
-
-        var config = JsonSerializer.Deserialize<SpawnsConfig>(File.ReadAllText(configPath))!;
-        config.ConvertToSpawnPoints(configPath);
-    }
-
-    private SpawnsConfig CreateSpawnsConfig(string configPath)
-    {
-        var config = new SpawnsConfig
-        {
-            Spawns = new List<SpawnConfig>
-            {
-                new SpawnConfig
-                {
-                    position = "",
-                    angles = "",
-                    team = (int)CsTeam.None,
-                    site = (int)Site.A
-                },
-            }
-        };
-
-        File.WriteAllText(configPath,
-            JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
-
-        return config;
     }
 }

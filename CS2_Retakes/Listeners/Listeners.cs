@@ -5,12 +5,34 @@ using CounterStrikeSharp.API.Modules.Entities;
 
 using static Retakes.Core;
 using static Retakes.Functions;
+using static Retakes.Database;
+
+using static Configs.Configs;
 
 namespace Retakes;
 
 class ListenersHandlers
 {
-    public static void OnClientAuthorized(int playerSlot, [CastFrom(typeof(ulong))] SteamID steamId)
+    public static void RegisterListeners()
+    {
+        _plugin.RegisterListener<Listeners.OnMapStart>(OnMapStart);
+        _plugin.RegisterListener<Listeners.OnClientAuthorized>(OnClientAuthorized);
+        _plugin.RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnect);
+        //_plugin.RegisterListener<Listeners.OnTick>(OnTick);
+    }
+
+    public static void OnMapStart(string mapName)
+    {
+        ServerCommand("exec retakes_game.cfg");
+
+        // Restart warmup for players to connect.
+        StartTimedWarmup(main_config.WARMUP_TIME);
+
+        LoadSpawns(mapName);
+    }
+
+
+    private static void OnClientAuthorized(int playerSlot, [CastFrom(typeof(ulong))] SteamID steamId)
     {
         CCSPlayerController player = Utilities.GetPlayerFromSlot(playerSlot);
         AddPlayerToList(player);
@@ -30,7 +52,7 @@ class ListenersHandlers
         db.Query(SQL_FetchUser_CB, $"SELECT * FROM `weapons` WHERE `auth` = '{player_obj.GetSteamID2()}'", index);
     }
 
-    public static void OnClientDisconnect(int playerSlot)
+    private static void OnClientDisconnect(int playerSlot)
     {
         CCSPlayerController player = Utilities.GetPlayerFromSlot(playerSlot);
         RemovePlayerFromList(player);
@@ -51,5 +73,10 @@ class ListenersHandlers
         db.Query(SQL_CheckForErrors, $"UPDATE `weapons` SET `t_primary` = '{player_obj.weaponsAllocator.primaryWeapon_t}', `ct_primary` = '{player_obj.weaponsAllocator.primaryWeapon_ct}', `secondary` = '{player_obj.weaponsAllocator.secondaryWeapon}', `give_awp` = '{(int)player_obj.weaponsAllocator.giveAWP}' WHERE `auth` = '{player_obj.GetSteamID2()}'");
 
         players.Remove(player_obj);
+    }
+
+    private static void OnTick()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -1,10 +1,9 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
-using CounterStrikeSharp.API.Modules.Entities;
 
 namespace Weapons;
 
-using static Retakes.Functions;
+using static Retakes.Core;
 
 public enum GiveAWP
 {
@@ -67,6 +66,8 @@ public class WeaponsAllocator
 
     public GiveAWP giveAWP = GiveAWP.NEVER;
 
+    public bool give_awp = false;
+
     public WeaponsAllocator(CCSPlayerController player)
     {
         this.player = player;
@@ -114,42 +115,42 @@ public class WeaponsAllocator
         return -1;
     }
 
-    public bool Allocate(bool give_awp)
+    public bool SetupGiveAwp()
     {
-        bool gave_awp = false;
+        bool give_awp;
+        if (giveAWP == GiveAWP.ALWAYS)
+        {
+            give_awp = true;
+        }
+        else
+        {
+            give_awp = new Random().Next(0, 2) == 1;
+        }
 
+        return give_awp;
+    }
+
+    public void Allocate(bool bombOwner = false)
+    {
         if (player == null || !player.IsValid)
         {
-            return gave_awp;
+            return;
         }
 
         if(!player.PawnIsAlive)
         {
-            return gave_awp;
+            return;
         }
 
         if(player.TeamNum < (byte)CsTeam.Terrorist || player.TeamNum > (byte)CsTeam.CounterTerrorist)
         {
-            return gave_awp;
+            return;
         }
 
-        string primary = string.Empty;
-
-        if(give_awp && giveAWP != GiveAWP.NEVER)
+        string primary;
+        if (give_awp )
         {
-            if(giveAWP == GiveAWP.ALWAYS)
-            {
-                gave_awp = true;
-            }
-            else
-            {
-                gave_awp = new Random().Next(0, 1) == 1;
-            }
-
-            if(gave_awp)
-            {
-                primary = "weapon_awp";
-            }
+            primary = "weapon_awp";
         }
         else
         {
@@ -168,6 +169,10 @@ public class WeaponsAllocator
         player.GiveNamedItem(secondary);
         player.GiveNamedItem("weapon_knife");
 
-        return gave_awp;
+        if(bombOwner)
+        {
+            player.GiveNamedItem("weapon_c4");
+            isBombPlantSignal = false;
+        }
     }
 }

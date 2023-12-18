@@ -1,13 +1,10 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 
-namespace Spawns;
+using Retakes;
+using static Retakes.Functions;
 
-public enum Site
-{
-    A,
-    B
-}
+namespace Spawns;
 
 public class Spawn
 { 
@@ -16,27 +13,33 @@ public class Spawn
     public QAngle angles;
     public CsTeam team;
     public Site site;
+    public bool isBombsite;
     
-    public Spawn(Vector position, QAngle angles, CsTeam team = CsTeam.None, Site site = Site.A)
+    public Spawn(Vector position, QAngle angles, CsTeam team = CsTeam.None, Site site = Site.A, bool isBombsite = false)
     {
         this.position = position;
         this.angles = angles;
         this.team = team;
         this.site = site;
+        this.isBombsite = isBombsite;
     }
 
-    public Spawn(int id, Vector position, QAngle angles, CsTeam team = CsTeam.None, Site site = Site.A)
+    public Spawn(int id, Vector position, QAngle angles, CsTeam team = CsTeam.None, Site site = Site.A, bool isBombsite = false)
     {
         this.id = id;
         this.position = position;
         this.angles = angles;
         this.team = team;
         this.site = site;
+        this.isBombsite = isBombsite;
     }
 
-    public Spawn(int id, string position, string angles, int team = (int)CsTeam.None, int site = (int)Site.A)
+    public Spawn(int id, string position, string angles, int team = (int)CsTeam.None, int site = (int)Site.A, bool isBombsite = false)
     {
         this.id = id;
+
+        if(position == string.Empty || angles == string.Empty)
+            ThrowError("Invalid spawn position or angles");
 
         string[] position_array = position.Split(" ");
         this.position = new Vector(float.Parse(position_array[0]), float.Parse(position_array[1]), float.Parse(position_array[2]));
@@ -46,10 +49,14 @@ public class Spawn
 
         this.team = (CsTeam)team;
         this.site = (Site)site;
+        this.isBombsite = isBombsite;
     }
 
-    public Spawn(string position, string angles, int team = (int)CsTeam.None, int site = (int)Site.A)
+    public Spawn(string position, string angles, int team = (int)CsTeam.None, int site = (int)Site.A, bool isBombsite = false)
     {
+        if(position == string.Empty || angles == string.Empty)
+            ThrowError("Invalid spawn position or angles");
+
         string[] position_array = position.Split(" ");
         this.position = new Vector(float.Parse(position_array[0]), float.Parse(position_array[1]), float.Parse(position_array[2]));
 
@@ -58,11 +65,11 @@ public class Spawn
 
         this.team = (CsTeam)team;
         this.site = (Site)site;
+        this.isBombsite = isBombsite;
     }
-
 
     public void Teleport(CCSPlayerController player)
     {
-        player.Teleport(position, angles, new Vector(0, 0, 0));
+        player.Pawn.Value!.Teleport(position, angles, new(0f, 0f, 0f));
     }
 }

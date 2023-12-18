@@ -4,6 +4,7 @@ using static Retakes.Core;
 using static Retakes.Functions;
 
 using static Configs.SpawnsConfig;
+using Retakes;
 
 namespace Spawns;
 
@@ -116,6 +117,14 @@ public class SpawnPoints
             return;
         }
 
+        Spawn spawn = spawns[index];
+
+        if(spawn == null!)
+        {
+            ThrowError($"Invalid spawn index: {index}");
+            return;
+        }
+
         if(main_config.DEBUG)
         {
             PrintToServer($"Teleporting player to spawn {index}: {spawns[index].position} {spawns[index].angles} {spawns[index].team} {spawns[index].site}");
@@ -126,11 +135,40 @@ public class SpawnPoints
 
     public void TeleportToSpawn(CCSPlayerController player, Spawn spawn)
     {
+        if(spawn == null!)
+        {
+            ThrowError($"Invalid spawn");
+            return;
+        }
+
         if(main_config.DEBUG)
         {
             PrintToServer($"Teleporting player to spawn: {spawn.position} {spawn.angles} {spawn.team} {spawn.site}");
         }
 
         spawn.Teleport(player);
+    }
+
+    public Spawn SelectSpawn(Player player)
+    {
+        Spawn spawn = spawns[new Random().Next(0, spawns.Count)];;
+        
+        if(spawn == null!)
+        {
+            return SelectSpawn(player);
+        }
+
+        if(selectedSpawns.Contains(spawn))
+        {
+            return SelectSpawn(player);
+        }
+
+        if(spawn.team != player.GetTeam() || spawn.site != currentSite || spawn.isBombsite != player.isBomberOwner)
+        {
+            return SelectSpawn(player);
+        }
+
+        selectedSpawns.Add(spawn);
+        return spawn;
     }
 }

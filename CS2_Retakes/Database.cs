@@ -67,7 +67,7 @@ public class Database
             return;
         }
 
-        string query = "CREATE TABLE IF NOT EXISTS `spawns` ( `id` INT NOT NULL AUTO_INCREMENT , `map` VARCHAR(128) NOT NULL , `position` VARCHAR(64) NOT NULL , `angles` VARCHAR(64) NOT NULL , `team` INT NOT NULL , `site` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;";
+        string query = "CREATE TABLE IF NOT EXISTS `spawns` ( `id` INT NOT NULL AUTO_INCREMENT , `map` VARCHAR(128) NOT NULL , `position` VARCHAR(64) NOT NULL , `angles` VARCHAR(64) NOT NULL , `team` INT NOT NULL , `site` INT NOT NULL, `is_bombsite` INT NOT NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;";
         query += "CREATE TABLE IF NOT EXISTS `weapons` ( `id` INT NOT NULL AUTO_INCREMENT , `auth` VARCHAR(128) NOT NULL , `name` VARCHAR(128) NOT NULL , `t_primary` INT NOT NULL , `ct_primary` INT NOT NULL , `secondary` INT NOT NULL, `give_awp` INT NOT NULL , PRIMARY KEY (`id`), UNIQUE (`auth`)) ENGINE = InnoDB;";
 
         Query(SQL_CheckForErrors, query);
@@ -130,7 +130,7 @@ public class Database
 
         string mapName = Server.MapName;
 
-        string query = $"INSERT INTO `spawns` (`map`, `position`, `angles`, `team`, `site`) VALUES ('{mapName}', '{spawn.position}', '{spawn.angles}', '{(int)spawn.team}', '{(int)spawn.site}');";
+        string query = $"INSERT INTO `spawns` (`map`, `position`, `angles`, `team`, `site`, `is_bombsite`) VALUES ('{mapName}', '{spawn.position}', '{spawn.angles}', {(int)spawn.team}, {(int)spawn.site}, {spawn.isBombsite});";
         query += "SELECT LAST_INSERT_ID() as id;";
 
         Query(SQL_InserRow_CB, query, index);
@@ -176,4 +176,13 @@ public class Database
 
         Query(SQL_CheckForErrors, query);
     }
+
+    public static void SQL_CheckForErrors(MySqlDataReader reader, Exception exception, dynamic data)
+    {
+        if(exception != null!)
+        {
+            ThrowError($"Databse error, {exception.Message}");
+            return;
+        }
+    } 
 }
