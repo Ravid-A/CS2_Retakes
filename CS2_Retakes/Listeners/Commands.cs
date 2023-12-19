@@ -19,6 +19,7 @@ class CommandsHandlers
     {
         _plugin.AddCommand("css_guns", "Opens the guns menu", GunsCommand);
         _plugin.AddCommand("css_addspawn", "Adds a spawn", AddSpawnCommand);
+        _plugin.AddCommand("css_spawnlist", "Shows the spawn list", SpawnListCommandI);
         _plugin.AddCommand("css_testspawn", "Test a spawn", TestSpawnCommand);
     }
 
@@ -26,6 +27,7 @@ class CommandsHandlers
     {
         _plugin.RemoveCommand("css_guns", GunsCommand);
         _plugin.RemoveCommand("css_addspawn", AddSpawnCommand);
+        _plugin.RemoveCommand("css_spawnlist", SpawnListCommandI);
         _plugin.AddCommand("css_testspawn", "Test a spawn", TestSpawnCommand);
     }
 
@@ -123,6 +125,29 @@ class CommandsHandlers
         spawnPoints.AddSpawn(spawn, true);
 
         PrintToChat(player, $"{PREFIX} Successfully added a spawn accourding to your current location.");
+    }
+
+    private static void SpawnListCommandI(CCSPlayerController? player, CommandInfo info)
+    {
+        if(player == null)
+        {
+            ReplyToCommand(info, $"{PREFIX} This command can only be executed by a player");
+            return;
+        }
+
+        if(!player.IsValid)
+        {
+            ReplyToCommand(info, $"{PREFIX} This command can only be executed by a valid player");
+            return;
+        }
+
+        if(!AdminManager.PlayerHasPermissions(player, "@css/root"))
+        {
+            ReplyToCommand(info, $"{PREFIX} You do not have permission to execute this command");
+            return;
+        }
+
+        spawnPoints.ShowSpawnsList(player);
     }
 
     private static void TestSpawnCommand(CCSPlayerController? player, CommandInfo info)

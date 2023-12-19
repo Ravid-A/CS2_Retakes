@@ -65,8 +65,9 @@ public class WeaponsAllocator
     public int secondaryWeapon = 0;
 
     public GiveAWP giveAWP = GiveAWP.NEVER;
-
     public bool give_awp = false;
+
+    public char nades = '\0';
 
     public WeaponsAllocator(CCSPlayerController player)
     {
@@ -169,10 +170,36 @@ public class WeaponsAllocator
         player.GiveNamedItem(secondary);
         player.GiveNamedItem("weapon_knife");
 
+        string nade = SelectNade();
+
+        player.GiveNamedItem(nade);
+
         if(bombOwner)
         {
             player.GiveNamedItem("weapon_c4");
             isBombPlantSignal = false;
         }
+    }
+
+    private string SelectNade()
+    {
+        string nade = string.Empty;
+
+        int rand = new Random().Next(0,3);
+
+        switch(rand)
+        {
+            case 0: 
+                nade = "weapon_hegrenade";
+                break;
+            case 1:
+                nade = "weapon_flashbang";
+                break;
+            case 2:
+                nade = "weapon_smokegrenade";
+                break;
+        }
+
+        return nade;
     }
 }

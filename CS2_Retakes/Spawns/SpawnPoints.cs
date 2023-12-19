@@ -1,10 +1,12 @@
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
 
 using static Retakes.Core;
 using static Retakes.Functions;
 
 using static Configs.SpawnsConfig;
 using Retakes;
+using CounterStrikeSharp.API.Modules.Menu;
 
 namespace Spawns;
 
@@ -170,5 +172,53 @@ public class SpawnPoints
 
         selectedSpawns.Add(spawn);
         return spawn;
+    }
+
+    public void ShowSpawnsList(CCSPlayerController player)
+    {
+        if(spawns.Count == 0)
+        {
+            PrintToChat(player, $"{PREFIX} No spawns have been set");
+            return;
+        }
+
+        ChatMenu menu = new ChatMenu($"{PREFIX_MENU} Spawns list:\n{PREFIX_MENU} Choose a spawn to teleport to:");
+
+        for(int i = 0; i < spawns.Count; i++)
+        {
+            Spawn spawn = spawns[i];
+
+            if(spawn == null!)
+            {
+                continue;
+            }
+
+            string team = spawn.team == CsTeam.CounterTerrorist ? "CT" : "T";
+            string site = spawn.site == Site.A ? "A" : "B";
+
+            menu.AddMenuOption($"{i+1} - {team} {site}", SpawnsList_SelectSpawn);
+        }
+
+        ChatMenus.OpenMenu(player, menu);
+    }
+
+    private void SpawnsList_SelectSpawn(CCSPlayerController player, ChatMenuOption option)
+    {
+        if (option == null)
+        {
+            PrintToChat(player, $"{PREFIX} You did not select a weapon!");
+            return;
+        }
+
+        Player player_obj = FindPlayer(player);
+
+        if (player_obj == null!)
+        {
+            return;
+        }
+
+        int index = int.Parse(option.Text.Split(" ")[0]) - 1;
+
+        TeleportToSpawn(player, index);
     }
 }
