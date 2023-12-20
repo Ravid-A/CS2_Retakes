@@ -25,11 +25,6 @@ public class Database
 
     public static void Connect(ConnectCallback callback, DBConfig config, dynamic data = null!)
     {
-        if(!main_config.use_db)
-        {
-            return;
-        }
-
         if(config == null!)
         {
             ThrowError("DBConfig cannot be null.");
@@ -62,12 +57,13 @@ public class Database
 
     public void CreateTables()
     {
-        if(!main_config.use_db)
+        string query = string.Empty;
+        if(main_config.use_db)
         {
+            query += "CREATE TABLE IF NOT EXISTS `spawns` ( `id` INT NOT NULL AUTO_INCREMENT , `map` VARCHAR(128) NOT NULL , `position` VARCHAR(64) NOT NULL , `angles` VARCHAR(64) NOT NULL , `team` INT NOT NULL , `site` INT NOT NULL, `is_bombsite` INT NOT NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;";
             return;
         }
 
-        string query = "CREATE TABLE IF NOT EXISTS `spawns` ( `id` INT NOT NULL AUTO_INCREMENT , `map` VARCHAR(128) NOT NULL , `position` VARCHAR(64) NOT NULL , `angles` VARCHAR(64) NOT NULL , `team` INT NOT NULL , `site` INT NOT NULL, `is_bombsite` INT NOT NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;";
         query += "CREATE TABLE IF NOT EXISTS `weapons` ( `id` INT NOT NULL AUTO_INCREMENT , `auth` VARCHAR(128) NOT NULL , `name` VARCHAR(128) NOT NULL , `t_primary` INT NOT NULL , `ct_primary` INT NOT NULL , `secondary` INT NOT NULL, `give_awp` INT NOT NULL , PRIMARY KEY (`id`), UNIQUE (`auth`)) ENGINE = InnoDB;";
 
         Query(SQL_CheckForErrors, query);
@@ -81,11 +77,6 @@ public class Database
 
     public void Query(QueryCallback callback, string query, dynamic data = null!)
     {
-        if(!main_config.use_db)
-        {
-            return;
-        }
-
         try 
         {
             if (string.IsNullOrEmpty(query))
