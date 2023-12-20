@@ -10,6 +10,7 @@ Retakes plugin written in C# (.Net) for CounterStrikeSharp
   - [x] Spawns list Command
   - [ ] Remove spawns Command
   - [ ] Edit spawns command
+  - [ ] Reload spawns (Read from db or json config)
 - [x] Per map spawns configuration
   - [x] Use MySQL
   - [x] Use Local Config
