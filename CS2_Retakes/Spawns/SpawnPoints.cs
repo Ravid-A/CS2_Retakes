@@ -123,7 +123,6 @@ public class SpawnPoints
 
         if(spawn == null!)
         {
-            ThrowError($"Invalid spawn index: {index}");
             return;
         }
 
@@ -139,7 +138,6 @@ public class SpawnPoints
     {
         if(spawn == null!)
         {
-            ThrowError($"Invalid spawn");
             return;
         }
 
@@ -153,6 +151,13 @@ public class SpawnPoints
 
     public Spawn SelectSpawn(Player player)
     {
+        player.selectSpawnCallCount++;
+
+        if(player.selectSpawnCallCount >= 25)
+        {
+            return null!;
+        }
+
         Spawn spawn = spawns[new Random().Next(0, spawns.Count)];;
         
         if(spawn == null!)
@@ -165,6 +170,7 @@ public class SpawnPoints
             return SelectSpawn(player);
         }
 
+        Console.WriteLine($"Spawn: {spawn.team} | Player: {player.GetTeam()} | Site: {spawn.site} | Player: {player.isBomberOwner}");
         if(spawn.team != player.GetTeam() || spawn.site != currentSite || spawn.isBombsite != player.isBomberOwner)
         {
             return SelectSpawn(player);
@@ -182,7 +188,7 @@ public class SpawnPoints
             return;
         }
 
-        ChatMenu menu = new ChatMenu($"{PREFIX_MENU} Spawns list:\n{PREFIX_MENU} Choose a spawn to teleport to:");
+        ChatMenu menu = new ChatMenu($"{PREFIX_MENU} Spawns list - Choose a spawn to teleport to:");
 
         for(int i = 0; i < spawns.Count; i++)
         {
@@ -196,8 +202,10 @@ public class SpawnPoints
             string team = spawn.team == CsTeam.CounterTerrorist ? "CT" : "T";
             string site = spawn.site == Site.A ? "A" : "B";
 
-            menu.AddMenuOption($"{i+1} - {team} {site}", (player, option) => SpawnsList_SelectSpawn(player, option, spawn));
+            menu.AddMenuOption($"{team} {site} (ID: {i})", (player, option) => SpawnsList_SelectSpawn(player, option, spawn));
         }
+
+        menu.AddMenuOption("Close", (player, option) => {});
 
         ChatMenus.OpenMenu(player, menu);
     }

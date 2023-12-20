@@ -23,6 +23,8 @@ public class Player
 
     public bool isBomberOwner => index == bombOwner;
 
+    public int selectSpawnCallCount = 0;
+
     public Player(CCSPlayerController player)
     {
         this.player = player;
@@ -60,7 +62,18 @@ public class Player
 
     public CsTeam GetTeam()
     {
-        return (CsTeam)player.TeamNum;
+        CsTeam team;
+
+        try
+        {
+            team = (CsTeam)player.TeamNum;
+        } 
+        catch
+        {
+            team = CsTeam.None;
+        }
+
+        return team;
     }
 
     public SteamID? GetSteamID()

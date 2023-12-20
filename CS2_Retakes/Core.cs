@@ -36,8 +36,11 @@ public class Core : BasePlugin
 
         public int WARMUP_TIME = 12;
         public int MAX_PLAYERS = 9;
-
+        public int MIN_PLAYERS = 2;
+        public int ROUND_TIME = 12;
         public bool DEBUG;
+
+        public bool auto_plant = false;
 
         public Config(MainConfig config)
         {
@@ -48,6 +51,9 @@ public class Core : BasePlugin
             DEBUG = config.DEBUG;
             WARMUP_TIME = config.WARMUP_TIME;
             MAX_PLAYERS = config.MAX_PLAYERS;
+            MIN_PLAYERS = config.MIN_PLAYERS;
+            ROUND_TIME = config.ROUND_TIME;
+            auto_plant = config.auto_plant;
         }
     }
 
@@ -58,8 +64,8 @@ public class Core : BasePlugin
     public override string ModuleAuthor => "Ravid";
     public override string ModuleDescription => "Retakes Plugin";
 
-    static CCSGameRules? _gameRules = null;
-    static void SetGameRules()
+    private static CCSGameRules? _gameRules = null;
+    private static void SetGameRules()
     {
         var gameRulesEntities = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules");
 
@@ -76,6 +82,11 @@ public class Core : BasePlugin
     public static List<Spawn> selectedSpawns = new List<Spawn>();
     public static Site currentSite = Site.A;
 
+    public static int numT = 0;
+    public static int numCT = 0;
+
+    public static int activePlayers = 0;
+
     private static bool WarmupRunning
     {
         get
@@ -84,6 +95,25 @@ public class Core : BasePlugin
                 SetGameRules();
 
             return _gameRules is not null && _gameRules.WarmupPeriod;
+        }
+    }
+
+    public static int RoundTime
+    {
+        get
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            return _gameRules is not null ? _gameRules.RoundTime : 0;
+        }
+        set 
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            if (_gameRules is not null)
+                _gameRules.RoundTime = value;
         }
     }
 

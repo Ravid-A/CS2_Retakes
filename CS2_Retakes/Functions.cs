@@ -75,6 +75,13 @@ class Functions
         Server.ExecuteCommand(string.Format(command, args));
     }
 
+    public static void StartPausedWarmup() 
+    {
+        ServerCommand("mp_warmup_start");
+        ServerCommand("mp_warmuptime 120");  // this value must be greater than 6 or the warmup countdown will always start
+        ServerCommand("mp_warmup_pausetimer 1");
+    }
+
     public static void StartTimedWarmup(int time) 
     {
         ServerCommand("mp_do_warmup_period 1");

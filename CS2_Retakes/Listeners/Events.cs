@@ -1,9 +1,12 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 
+using static Spawns.SpawnPoints;
+
 using static Retakes.Core;
 using static Retakes.Functions;
 using static Retakes.Player;
+using CounterStrikeSharp.API;
 
 namespace Retakes;
 
@@ -23,7 +26,6 @@ class EventsHandlers
     {
         if(!isLive())
         {
-            ServerCommand($"mp_warmuptime {main_config.WARMUP_TIME}");
             return HookResult.Continue;
         }
 
@@ -32,6 +34,7 @@ class EventsHandlers
         selectedSpawns.Clear();
 
         List<int> ts_players = new List<int>();
+        List<int> ct_players = new List<int>();
 
         for(int i = 0; i < players.Count; i++)
         {
@@ -45,6 +48,11 @@ class EventsHandlers
             {
                 ts_players.Add(i);
             }
+
+            if(player.GetTeam() == CsTeam.CounterTerrorist)
+            {
+                ct_players.Add(i);
+            }
         }
 
         if(ts_players.Count >= 1)
@@ -52,6 +60,11 @@ class EventsHandlers
             int player_index = ts_players[new Random().Next(0, ts_players.Count)];
             bombOwner = player_index;
         }
+
+        numT = ts_players.Count;
+        numCT = ct_players.Count;
+
+        activePlayers = numCT + numT;
 
         SetupPlayers(players);
 
@@ -64,6 +77,9 @@ class EventsHandlers
         {
             return HookResult.Continue;
         }
+
+        RoundTime = main_config.ROUND_TIME;
+        PrintToChatAll($"{PREFIX} Retake \x04{(currentSite == Site.A ? "A" : "B")}\x01: \x07{numT} Ts \x01vs \x0E{numCT} CTs");
 
         isBombPlanted = false;
         return HookResult.Continue;
@@ -106,6 +122,7 @@ class EventsHandlers
             return HookResult.Continue;
         }
 
+        player.selectSpawnCallCount = 0;
         spawnPoints.TeleportToSpawn(player_controller, spawnPoints.SelectSpawn(player));
         player.CreateSpawnDelay();
 
