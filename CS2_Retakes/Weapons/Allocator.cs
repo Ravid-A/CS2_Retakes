@@ -24,8 +24,6 @@ public class Weapon
     }
 }
 
-
-
 public class WeaponsAllocator
 {
     public enum WeaponType

@@ -8,7 +8,6 @@ using Spawns;
 using static Retakes.Core;
 using static Retakes.Functions;
 
-
 using static Weapons.WeaponsMenu;
 
 namespace Retakes;
@@ -19,7 +18,7 @@ class CommandsHandlers
     {
         _plugin.AddCommand("css_guns", "Opens the guns menu", GunsCommand);
         _plugin.AddCommand("css_addspawn", "Adds a spawn", AddSpawnCommand);
-        _plugin.AddCommand("css_spawnlist", "Shows the spawn list", SpawnListCommandI);
+        _plugin.AddCommand("css_spawnlist", "Shows the spawn list", SpawnListCommand);
         _plugin.AddCommand("css_testspawn", "Test a spawn", TestSpawnCommand);
     }
 
@@ -27,8 +26,8 @@ class CommandsHandlers
     {
         _plugin.RemoveCommand("css_guns", GunsCommand);
         _plugin.RemoveCommand("css_addspawn", AddSpawnCommand);
-        _plugin.RemoveCommand("css_spawnlist", SpawnListCommandI);
-        _plugin.AddCommand("css_testspawn", "Test a spawn", TestSpawnCommand);
+        _plugin.RemoveCommand("css_spawnlist", SpawnListCommand);
+        _plugin.RemoveCommand("css_testspawn", TestSpawnCommand);
     }
 
     private static void GunsCommand(CCSPlayerController? player, CommandInfo commandinfo)
@@ -127,7 +126,7 @@ class CommandsHandlers
         PrintToChat(player, $"{PREFIX} Successfully added a spawn accourding to your current location.");
     }
 
-    private static void SpawnListCommandI(CCSPlayerController? player, CommandInfo info)
+    private static void SpawnListCommand(CCSPlayerController? player, CommandInfo info)
     {
         if(player == null)
         {

@@ -1,12 +1,12 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using CounterStrikeSharp.API.Modules.Menu;
 
 using static Retakes.Core;
 using static Retakes.Functions;
+using Retakes;
 
 using static Configs.SpawnsConfig;
-using Retakes;
-using CounterStrikeSharp.API.Modules.Menu;
 
 namespace Spawns;
 
@@ -38,7 +38,7 @@ public class SpawnPoints
     {
         if(main_config.DEBUG)
         {
-            PrintToServer($"Adding spawn: {spawn.position} {spawn.angles} {spawn.team} {spawn.site}");
+            PrintToServer($"Adding spawn: {spawn.position} {spawn.angles} {spawn.team} {spawn.site} {spawn.isBombsite}");
         }
 
         spawns.Add(spawn);
@@ -85,7 +85,7 @@ public class SpawnPoints
 
         if(main_config.DEBUG)
         {
-            PrintToServer($"Removing spawn: {spawns[index].position} {spawns[index].angles} {spawns[index].team} {spawns[index].site}");
+            PrintToServer($"Removing spawn: {spawns[index].position} {spawns[index].angles} {spawns[index].team} {spawns[index].site} {spawns[index].isBombsite}");
         }
 
         Spawn spawn = spawns[index];
