@@ -196,13 +196,13 @@ public class SpawnPoints
             string team = spawn.team == CsTeam.CounterTerrorist ? "CT" : "T";
             string site = spawn.site == Site.A ? "A" : "B";
 
-            menu.AddMenuOption($"{i+1} - {team} {site}", SpawnsList_SelectSpawn);
+            menu.AddMenuOption($"{i+1} - {team} {site}", (player, option) => SpawnsList_SelectSpawn(player, option, spawn));
         }
 
         ChatMenus.OpenMenu(player, menu);
     }
 
-    private void SpawnsList_SelectSpawn(CCSPlayerController player, ChatMenuOption option)
+    private void SpawnsList_SelectSpawn(CCSPlayerController player, ChatMenuOption option, Spawn spawn)
     {
         if (option == null)
         {
@@ -217,8 +217,6 @@ public class SpawnPoints
             return;
         }
 
-        int index = int.Parse(option.Text.Split(" ")[0]) - 1;
-
-        TeleportToSpawn(player, index);
+        TeleportToSpawn(player, spawn);
     }
 }

@@ -38,9 +38,9 @@ public class Configs
         {
             prefixs = new PREFIXS
             {
-                PREFIX = " \x04[Retakes]]\x01",
+                PREFIX = " \x04[Retakes]\x01",
                 PREFIX_CON = "[Retakes]",
-                PREFIX_MENU = " \x04[Retakes]]\x01"
+                PREFIX_MENU = " \x04[Retakes]\x01"
             },
             DEBUG = false,
             use_db = false
