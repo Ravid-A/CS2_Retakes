@@ -11,6 +11,8 @@ using static Retakes.EventsHandlers;
 using static Retakes.ListenersHandlers;
 using static Retakes.Functions;
 using static Retakes.Database;
+using static Retakes.PlantLogic;
+using static Retakes.DefuseLogic;
 
 using Spawns;
 using Weapons;
@@ -40,7 +42,8 @@ public class Core : BasePlugin
         public int ROUND_TIME = 12;
         public bool DEBUG;
 
-        public bool auto_plant = false;
+        public bool insta_plant = true;
+        public bool insta_defuse = true;
 
         public Config(MainConfig config)
         {
@@ -53,7 +56,8 @@ public class Core : BasePlugin
             MAX_PLAYERS = config.MAX_PLAYERS;
             MIN_PLAYERS = config.MIN_PLAYERS;
             ROUND_TIME = config.ROUND_TIME;
-            auto_plant = config.auto_plant;
+            insta_plant = config.insta_plant;
+            insta_defuse = config.insta_defuse;
         }
     }
 
@@ -117,8 +121,25 @@ public class Core : BasePlugin
         }
     }
 
-    public static bool isBombPlanted = false;
-    public static bool isBombPlantSignal = false;
+    public static bool FreezePeriod
+    {
+        get
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            return _gameRules is not null && _gameRules.FreezePeriod;
+        }
+        set
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            if (_gameRules is not null)
+                _gameRules.FreezePeriod = value;
+        }
+    }
+
     public static int bombOwner = -1;
 
     public override void Load(bool hotReload)
@@ -132,6 +153,9 @@ public class Core : BasePlugin
         RegisterCommands();
         RegisterEvents();
         RegisterListeners();
+
+        PlantLogic_OnLoad();
+        DefuseLogic_OnLoad();
 
         if(hotReload)
         {

@@ -1,3 +1,4 @@
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -11,7 +12,6 @@ using static Retakes.Functions;
 using static Weapons.WeaponsMenu;
 
 using static Configs.Configs;
-using CounterStrikeSharp.API;
 
 namespace Retakes;
 

@@ -175,7 +175,6 @@ public class WeaponsAllocator
         if(bombOwner)
         {
             player.GiveNamedItem("weapon_c4");
-            isBombPlantSignal = false;
         }
     }
 
