@@ -21,8 +21,8 @@ Retakes plugin written in C# (.Net) for CounterStrikeSharp
 - [ ] Add autoplant
 - [ ] Queue System for entering the game
 - [ ] Team switch calculations
-- [ ] Add optional instaplant
-- [ ] Add optional instadefuse
+- [x] Add optional instaplant
+- [x] Add optional instadefuse
 
 ## Setup for development
 

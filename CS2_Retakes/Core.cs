@@ -1,5 +1,6 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 using MySqlConnector;
 
@@ -11,6 +12,8 @@ using static Retakes.EventsHandlers;
 using static Retakes.ListenersHandlers;
 using static Retakes.Functions;
 using static Retakes.Database;
+using static Retakes.PlantLogic;
+using static Retakes.DefuseLogic;
 
 using Spawns;
 using Weapons;
@@ -25,38 +28,6 @@ public enum Site
 
 public class Core : BasePlugin
 {
-    public class Config
-    {
-        public string PREFIX;
-        public string PREFIX_CON;
-
-        public string PREFIX_MENU;
-
-        public bool use_db = false;
-
-        public int WARMUP_TIME = 12;
-        public int MAX_PLAYERS = 9;
-        public int MIN_PLAYERS = 2;
-        public int ROUND_TIME = 12;
-        public bool DEBUG;
-
-        public bool auto_plant = false;
-
-        public Config(MainConfig config)
-        {
-            PREFIX = config.prefixs.PREFIX;
-            PREFIX_CON = config.prefixs.PREFIX_CON;
-            PREFIX_MENU = config.prefixs.PREFIX_MENU;
-            use_db = config.use_db;
-            DEBUG = config.DEBUG;
-            WARMUP_TIME = config.WARMUP_TIME;
-            MAX_PLAYERS = config.MAX_PLAYERS;
-            MIN_PLAYERS = config.MIN_PLAYERS;
-            ROUND_TIME = config.ROUND_TIME;
-            auto_plant = config.auto_plant;
-        }
-    }
-
     public static Core _plugin = null!;
 
     public override string ModuleName => "Retakes Plugin";
@@ -117,8 +88,34 @@ public class Core : BasePlugin
         }
     }
 
-    public static bool isBombPlanted = false;
-    public static bool isBombPlantSignal = false;
+    public static void TerminateRound(float delay, RoundEndReason reason)
+    {
+        if (_gameRules is null)
+            SetGameRules();
+
+        if (_gameRules is not null)
+            _gameRules.TerminateRound(delay, reason);
+    }
+
+    public static bool FreezePeriod
+    {
+        get
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            return _gameRules is not null && _gameRules.FreezePeriod;
+        }
+        set
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            if (_gameRules is not null)
+                _gameRules.FreezePeriod = value;
+        }
+    }
+
     public static int bombOwner = -1;
 
     public override void Load(bool hotReload)
@@ -132,6 +129,9 @@ public class Core : BasePlugin
         RegisterCommands();
         RegisterEvents();
         RegisterListeners();
+
+        PlantLogic_OnLoad();
+        DefuseLogic_OnLoad();
 
         if(hotReload)
         {

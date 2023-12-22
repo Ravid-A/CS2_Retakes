@@ -123,18 +123,7 @@ public class Player
 
     public void CreateSpawnDelay()
     {
-        _plugin.AddTimer(1f, Timer_StartPlant);
         _plugin.AddTimer(.05f, Timer_GiveWeapons);
-    }
-
-    private void Timer_StartPlant()
-    {
-        if(!isLive())
-        {
-            return;
-        }
-
-        isBombPlantSignal = true;
     }
 
     private void Timer_GiveWeapons()
@@ -145,5 +134,10 @@ public class Player
         }
 
         weaponsAllocator.Allocate(isBomberOwner);
+    }
+
+    public Vector GetOrigin()
+    {
+        return player!.Pawn!.Value!.AbsOrigin!;
     }
 }
