@@ -15,7 +15,7 @@ public class Config
 
     public string PREFIX_MENU;
 
-    public bool use_db = false;
+    public bool use_db = true;
 
     public int WARMUP_TIME = 12;
     public int MAX_PLAYERS = 9;
@@ -81,7 +81,7 @@ public class Configs
                 PREFIX_MENU = " \x04[Retakes]\x01"
             },
             DEBUG = false,
-            use_db = false
+            use_db = true
         };
 
         File.WriteAllText(configPath,

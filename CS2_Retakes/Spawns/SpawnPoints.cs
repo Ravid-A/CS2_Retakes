@@ -151,6 +151,11 @@ public class SpawnPoints
 
     public Spawn SelectSpawn(Player player)
     {
+        if(spawns.Count == 0)
+        {
+            return null!;
+        }
+
         player.selectSpawnCallCount++;
 
         if(player.selectSpawnCallCount >= 25)

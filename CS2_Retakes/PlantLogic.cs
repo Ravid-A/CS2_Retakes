@@ -20,7 +20,7 @@ public class PlantLogic
         CPlantedC4 planted_c4 = GetPlantedC4();
         if (planted_c4 == null!)
         {
-            //CreateNaturalPlantedC4();
+            CreateNaturalPlantedC4();
         }
     }
 
@@ -31,7 +31,7 @@ public class PlantLogic
             return;
         }
 
-        //CreateNaturalPlantedC4();
+        CreateNaturalPlantedC4();
     }
 
     public static void PlantLogic_OnBeginPlant(CCSPlayerController player)
@@ -46,9 +46,11 @@ public class PlantLogic
         ForceC4Plant(c4);
     }
 
-    public static void PlantLogic_OnBombPlanted()
+    public static void PlantLogic_OnBombPlanted(CCSPlayerController planter)
     {
-        SetFreezePeriod(false);
+        SetFreezePeriod(false); 
+
+        PrintToChatAll($"{PREFIX} \x07{planter.PlayerName}\x01 has planted the bomb!");
     }
 
     private static void SetFreezePeriod(bool value)
@@ -79,27 +81,60 @@ public class PlantLogic
             return false;
         }
 
-        Vector plant_origin = planter.AbsOrigin!;
+        Vector playerOrigin = planter.PlayerPawn!.Value!.AbsOrigin!;
 
-        CPlantedC4 planted_c4 = Utilities.CreateEntityByName<CPlantedC4>("planted_c4")!;
-
-        if (planted_c4 == null!)
+        if(playerOrigin == null!)
         {
             return false;
         }
 
-        planted_c4.DispatchSpawn();
+        playerOrigin.Z -= planter.PlayerPawn.Value.Collision.Mins.Z;
 
-        _plugin.AddTimer(0.05f, () =>
+        CBaseModelEntity prop = Utilities.CreateEntityByName<CBaseModelEntity>("planted_c4")!;
+
+        if (prop == null!) 
         {
-            planted_c4.Teleport(plant_origin, new(0f, 0f, 0f), new(0f, 0f, 0f));
-            planted_c4.BombTicking = true;
+            return false;
+        }
+
+        prop.DispatchSpawn();
+
+        CPlantedC4 plantedC4 = new CPlantedC4(prop.Handle);
+
+        Server.NextFrame(() =>
+        {
+            prop.Teleport(playerOrigin, new QAngle(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero), new Vector(0, 0, 0));
+
+            BombPlanted = true;
+
+            plantedC4.BombTicking = true;
+
+            NotifyBombPlanted(planter);
+            RemoveC4FromPlayer(planter);
         });
+        return true;
+    }
 
-        RemoveBombWeapons(planter);
+    //A cheaty to remove the c4 from the player
+    private static bool RemoveC4FromPlayer(CCSPlayerController player)
+    {
+        if(player == null! || !player.IsValid)
+        {
+            return false;
+        }
 
-        NotifyBombPlanted(planter);
+        player.ExecuteClientCommand("slot5");
 
+        var active_weapon = player.PlayerPawn.Value!.WeaponServices!.ActiveWeapon.Value;
+
+        if(active_weapon == null)
+        {
+            return false;
+        }
+
+        player.DropActiveWeapon();
+        active_weapon.Remove();
+        
         return true;
     }
 
@@ -157,11 +192,5 @@ public class PlantLogic
         }
 
         return c4;
-    }
-
-    // Removes any 'weapon_c4' entities.
-    private static void RemoveBombWeapons(CCSPlayerController player)
-    {
-        Utilities.RemoveItemByDesignerName(player, "weapon_c4");
     }
 }

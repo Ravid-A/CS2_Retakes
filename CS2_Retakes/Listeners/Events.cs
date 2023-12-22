@@ -197,7 +197,14 @@ class EventsHandlers
             return HookResult.Continue;
         }
 
-        PlantLogic_OnBombPlanted();
+        CCSPlayerController player = @event.Userid;
+
+        if(player == null! || !player.IsValid)
+        {
+            return HookResult.Continue;
+        }
+
+        PlantLogic_OnBombPlanted(player);
 
         return HookResult.Continue;
     }

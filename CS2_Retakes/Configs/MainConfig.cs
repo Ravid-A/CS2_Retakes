@@ -4,7 +4,7 @@ public class MainConfig
 {
     public PREFIXS prefixs { get; set; } = null!;
     public required bool DEBUG { get; init; } = false;
-    public required bool use_db { get; init; } = false;
+    public required bool use_db { get; init; } = true;
     public int WARMUP_TIME { get; init; } = 12;
     public int MAX_PLAYERS { get; init; } = 9;
     public int MIN_PLAYERS { get; init; } = 2;

@@ -126,8 +126,8 @@ class CommandsHandlers
             isBombsite = false;
         }
 
-        Vector absPos = player!.Pawn!.Value!.AbsOrigin!;
-        QAngle absRot = player!.Pawn!.Value!.AbsRotation!;
+        Vector absPos = player!.PlayerPawn!.Value!.AbsOrigin!;
+        QAngle absRot = player!.PlayerPawn!.Value!.AbsRotation!;
 
         Vector vOrigin = new Vector(absPos.X, absPos.Y, absPos.Z);
         QAngle qAngle = new QAngle(absRot.X, absRot.Y, absRot.Z);
