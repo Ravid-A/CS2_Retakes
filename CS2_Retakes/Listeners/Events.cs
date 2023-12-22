@@ -6,6 +6,7 @@ using static Retakes.Functions;
 using static Retakes.Player;
 using static Retakes.PlantLogic;
 using static Retakes.DefuseLogic;
+using CounterStrikeSharp.API;
 
 namespace Retakes;
 
@@ -14,6 +15,7 @@ class EventsHandlers
     public static void RegisterEvents()
     {
         _plugin.RegisterEventHandler<EventRoundPrestart>(OnRoundPreStart);
+        _plugin.RegisterEventHandler<EventRoundStart>(OnRoundStart);
         _plugin.RegisterEventHandler<EventRoundPoststart>(OnRoundPostStart);
         _plugin.RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
 
@@ -63,6 +65,7 @@ class EventsHandlers
             }
         }
 
+        bombOwner = -1;
         if(ts_players.Count >= 1)
         {
             int player_index = ts_players[new Random().Next(0, ts_players.Count)];
@@ -79,6 +82,18 @@ class EventsHandlers
         return HookResult.Continue;
     }
 
+    private static HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
+    {
+        if(!isLive())
+        {
+            return HookResult.Continue;
+        }
+
+        
+        PrintToChatAll($"{PREFIX} Retake \x04{(currentSite == Site.A ? "A" : "B")}\x01: \x07{numT} Ts \x01vs \x0E{numCT} CTs");
+        return HookResult.Continue;
+    }
+
     private static HookResult OnRoundPostStart(EventRoundPoststart @event, GameEventInfo info)
     {
         if(!isLive())
@@ -87,8 +102,6 @@ class EventsHandlers
         }
 
         RoundTime = main_config.ROUND_TIME;
-        PrintToChatAll($"{PREFIX} Retake \x04{(currentSite == Site.A ? "A" : "B")}\x01: \x07{numT} Ts \x01vs \x0E{numCT} CTs");
-
         return HookResult.Continue;
     }
 

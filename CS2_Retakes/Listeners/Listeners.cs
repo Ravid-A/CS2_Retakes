@@ -25,8 +25,11 @@ class ListenersHandlers
     {
         ServerCommand("exec retakes_game.cfg");
 
-        // Restart warmup for players to connect.
-        StartTimedWarmup(main_config.WARMUP_TIME);
+        _plugin.AddTimer(1f, () =>
+        {
+            // Restart warmup for players to connect.
+            StartTimedWarmup(main_config.WARMUP_TIME);
+        });
 
         LoadSpawns(mapName);
     }

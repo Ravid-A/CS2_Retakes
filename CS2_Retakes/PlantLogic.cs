@@ -2,7 +2,6 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 
 using static Retakes.Core;
-using static Retakes.Functions;
 
 namespace Retakes;
 
@@ -15,8 +14,6 @@ public class PlantLogic
 
     public static void PlantLogic_OnBeginPlant(CCSPlayerController player)
     {
-        PrintToChatAll($"{PREFIX} {player.PlayerName} is planting the bomb.");
-
         CC4 c4 = GetWeaponC4();
 
         if(c4 == null!)

@@ -1,6 +1,7 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Utils;
 
 using static Retakes.Core;
 
@@ -89,5 +90,38 @@ class Functions
         ServerCommand($"mp_warmuptime {time}");
         ServerCommand("mp_warmup_start");
         ServerCommand("mp_warmup_start"); // don't ask.
+    }
+
+    public static float GetVectorDistance(Vector vec1, Vector vec2, bool squared=false)
+    {
+        float distance = (float)Math.Sqrt(Math.Pow(vec1.X - vec2.X, 2) + Math.Pow(vec1.Y - vec2.Y, 2) + Math.Pow(vec1.Z - vec2.Z, 2));
+        return (float)Math.Pow(distance, squared ? 2 : 1);
+    }
+
+    public static int GetTeamClientCount(CsTeam team, bool alive = false)
+    {
+        int count = 0;
+
+        ;
+
+        foreach (CCSPlayerController player in Utilities.GetPlayers())
+        {
+            if (player.TeamNum == (byte)team)
+            {
+                if (alive)
+                {
+                    if (player.PawnIsAlive)
+                    {
+                        count++;
+                    }
+                }
+                else
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
     }
 }

@@ -11,6 +11,7 @@ public class MainConfig
     public int ROUND_TIME { get; init; } = 12;
     public bool insta_plant { get; init; } = true;
     public bool insta_defuse { get; init; } = true;
+    public bool explode_no_time { get; init; } = true;
 }
 
 public class PREFIXS

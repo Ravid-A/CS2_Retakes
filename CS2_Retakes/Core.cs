@@ -1,5 +1,6 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 using MySqlConnector;
 
@@ -27,40 +28,6 @@ public enum Site
 
 public class Core : BasePlugin
 {
-    public class Config
-    {
-        public string PREFIX;
-        public string PREFIX_CON;
-
-        public string PREFIX_MENU;
-
-        public bool use_db = false;
-
-        public int WARMUP_TIME = 12;
-        public int MAX_PLAYERS = 9;
-        public int MIN_PLAYERS = 2;
-        public int ROUND_TIME = 12;
-        public bool DEBUG;
-
-        public bool insta_plant = true;
-        public bool insta_defuse = true;
-
-        public Config(MainConfig config)
-        {
-            PREFIX = config.prefixs.PREFIX;
-            PREFIX_CON = config.prefixs.PREFIX_CON;
-            PREFIX_MENU = config.prefixs.PREFIX_MENU;
-            use_db = config.use_db;
-            DEBUG = config.DEBUG;
-            WARMUP_TIME = config.WARMUP_TIME;
-            MAX_PLAYERS = config.MAX_PLAYERS;
-            MIN_PLAYERS = config.MIN_PLAYERS;
-            ROUND_TIME = config.ROUND_TIME;
-            insta_plant = config.insta_plant;
-            insta_defuse = config.insta_defuse;
-        }
-    }
-
     public static Core _plugin = null!;
 
     public override string ModuleName => "Retakes Plugin";
@@ -119,6 +86,15 @@ public class Core : BasePlugin
             if (_gameRules is not null)
                 _gameRules.RoundTime = value;
         }
+    }
+
+    public static void TerminateRound(float delay, RoundEndReason reason)
+    {
+        if (_gameRules is null)
+            SetGameRules();
+
+        if (_gameRules is not null)
+            _gameRules.TerminateRound(delay, reason);
     }
 
     public static bool FreezePeriod

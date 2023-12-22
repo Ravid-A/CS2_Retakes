@@ -48,7 +48,7 @@ class CommandsHandlers
             ReplyToCommand(commandinfo, $"{PREFIX} This command can only be executed by a valid player.");
             return;
         }
-
+        
         Player player_obj = FindPlayer(player);
 
         if(player_obj == null!)
@@ -120,6 +120,11 @@ class CommandsHandlers
         CsTeam team = team_str == "ct" ? CsTeam.CounterTerrorist : CsTeam.Terrorist;
         Site site = site_str == "a" ? Site.A : Site.B;
         bool isBombsite = isBombsite_str == "1";
+
+        if(team == CsTeam.CounterTerrorist)
+        {
+            isBombsite = false;
+        }
 
         Vector absPos = player!.Pawn!.Value!.AbsOrigin!;
         QAngle absRot = player!.Pawn!.Value!.AbsRotation!;
