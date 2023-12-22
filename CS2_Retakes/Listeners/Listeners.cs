@@ -37,6 +37,12 @@ class ListenersHandlers
 
     private static void OnClientAuthorized(int playerSlot, [CastFrom(typeof(ulong))] SteamID steamId)
     {
+        if(steamId.SteamId2 == string.Empty)
+        {
+            ServerCommand("kickid " + playerSlot + " \"SteamID2 not found.\"");
+            return;
+        }
+
         CCSPlayerController player = Utilities.GetPlayerFromSlot(playerSlot);
         AddPlayerToList(player);
     }
