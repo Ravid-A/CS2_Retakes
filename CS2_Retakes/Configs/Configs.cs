@@ -15,7 +15,7 @@ public class Config
 
     public string PREFIX_MENU;
 
-    public bool use_db = false;
+    public bool use_db = true;
 
     public int WARMUP_TIME = 12;
     public int MAX_PLAYERS = 9;
@@ -23,9 +23,9 @@ public class Config
     public int ROUND_TIME = 12;
     public bool DEBUG;
 
+    public bool auto_plant = true;
     public bool insta_plant = true;
     public bool insta_defuse = true;
-
     public bool explode_no_time = true;
 
     public Config(MainConfig config)
@@ -39,6 +39,7 @@ public class Config
         MAX_PLAYERS = config.MAX_PLAYERS;
         MIN_PLAYERS = config.MIN_PLAYERS;
         ROUND_TIME = config.ROUND_TIME;
+        auto_plant = config.auto_plant;
         insta_plant = config.insta_plant;
         insta_defuse = config.insta_defuse;
         explode_no_time = config.explode_no_time;
@@ -80,7 +81,7 @@ public class Configs
                 PREFIX_MENU = " \x04[Retakes]\x01"
             },
             DEBUG = false,
-            use_db = false
+            use_db = true
         };
 
         File.WriteAllText(configPath,

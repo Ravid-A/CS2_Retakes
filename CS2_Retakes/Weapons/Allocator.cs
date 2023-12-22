@@ -175,6 +175,8 @@ public class WeaponsAllocator
         if(bombOwner)
         {
             player.GiveNamedItem("weapon_c4");
+            player.ExecuteClientCommand("slot5");
+            player.PlayerPawn!.Value!.CanMoveDuringFreezePeriod = true;
         }
     }
 

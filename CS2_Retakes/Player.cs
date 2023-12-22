@@ -138,6 +138,6 @@ public class Player
 
     public Vector GetOrigin()
     {
-        return player!.Pawn!.Value!.AbsOrigin!;
+        return player!.PlayerPawn!.Value!.AbsOrigin!;
     }
 }

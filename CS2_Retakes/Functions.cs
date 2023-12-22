@@ -124,4 +124,17 @@ class Functions
 
         return count;
     }
+
+    public static CCSPlayerController GetPlanter()
+    {
+        foreach (Player player in players)
+        {
+            if (player.isBomberOwner)
+            {
+                return player.player;
+            }
+        }
+
+        return null!;
+    }
 }

@@ -18,11 +18,12 @@ Retakes plugin written in C# (.Net) for CounterStrikeSharp
   - [x] ChatMenu for weapon selection
   - [x] Give weapon after spawns
   - [x] Option to sometimes get AWP
-- [ ] Add autoplant
+- [x] Add autoplant
 - [ ] Queue System for entering the game
 - [ ] Team switch calculations
 - [x] Add optional instaplant
 - [x] Add optional instadefuse
+- [ ] Optional - Add waiting for enought players
 
 ## Setup for development
 

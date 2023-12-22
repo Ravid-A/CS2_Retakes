@@ -116,6 +116,25 @@ public class Core : BasePlugin
         }
     }
 
+    public static bool BombPlanted 
+    {
+        get
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            return _gameRules is not null && _gameRules.BombPlanted;
+        }
+        set
+        {
+            if (_gameRules is null)
+                SetGameRules();
+
+            if (_gameRules is not null)
+                _gameRules.BombPlanted = value;
+        }
+    }
+
     public static int bombOwner = -1;
 
     public override void Load(bool hotReload)

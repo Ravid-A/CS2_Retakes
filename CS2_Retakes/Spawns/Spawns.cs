@@ -70,6 +70,6 @@ public class Spawn
 
     public void Teleport(CCSPlayerController player)
     {
-        player.Pawn.Value!.Teleport(position, angles, new(0f, 0f, 0f));
+        player.PlayerPawn!.Value!.Teleport(position, angles, new(0f, 0f, 0f));
     }
 }

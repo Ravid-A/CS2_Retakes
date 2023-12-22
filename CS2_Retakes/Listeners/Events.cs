@@ -107,10 +107,17 @@ class EventsHandlers
 
     private static HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
     {
+        if(!isLive())
+        {
+            return HookResult.Continue;
+        }
+
         foreach(Player player in players)
         {
             player.roundPoints = 0;
         }
+
+        PlantLogic_OnRoundFreezeEnd();
 
         return HookResult.Continue;
     }
@@ -190,7 +197,14 @@ class EventsHandlers
             return HookResult.Continue;
         }
 
-        PlantLogic_OnBombPlanted();
+        CCSPlayerController player = @event.Userid;
+
+        if(player == null! || !player.IsValid)
+        {
+            return HookResult.Continue;
+        }
+
+        PlantLogic_OnBombPlanted(player);
 
         return HookResult.Continue;
     }
