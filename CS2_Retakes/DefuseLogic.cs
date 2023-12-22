@@ -109,7 +109,7 @@ public class DefuseLogic
         });
     }
 
-    static void InstaDefuseAttempt(CPlantedC4 c4)
+    public static void InstaDefuseAttempt(CPlantedC4 c4)
     {
         CCSPlayerController client = defuser;
         
@@ -236,7 +236,7 @@ public class DefuseLogic
         return false;
     }
 
-    private static CPlantedC4 GetPlantedC4()
+    public static CPlantedC4 GetPlantedC4()
     {
         var c4list = Utilities.FindAllEntitiesByDesignerName<CPlantedC4>("planted_c4");
 

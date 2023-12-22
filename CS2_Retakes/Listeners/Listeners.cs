@@ -6,6 +6,7 @@ using CounterStrikeSharp.API.Modules.Entities;
 using static Retakes.Core;
 using static Retakes.Functions;
 using static Retakes.Database;
+using static Retakes.PlantLogic;
 
 using static Configs.Configs;
 
@@ -65,6 +66,7 @@ class ListenersHandlers
     {
         CCSPlayerController player = Utilities.GetPlayerFromSlot(playerSlot);
         RemovePlayerFromList(player);
+        PlantLogic_OnClientDisconnect(player);
     }
 
     private static void RemovePlayerFromList(CCSPlayerController player)

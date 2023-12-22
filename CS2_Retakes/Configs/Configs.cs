@@ -23,9 +23,9 @@ public class Config
     public int ROUND_TIME = 12;
     public bool DEBUG;
 
+    public bool auto_plant = true;
     public bool insta_plant = true;
     public bool insta_defuse = true;
-
     public bool explode_no_time = true;
 
     public Config(MainConfig config)
@@ -39,6 +39,7 @@ public class Config
         MAX_PLAYERS = config.MAX_PLAYERS;
         MIN_PLAYERS = config.MIN_PLAYERS;
         ROUND_TIME = config.ROUND_TIME;
+        auto_plant = config.auto_plant;
         insta_plant = config.insta_plant;
         insta_defuse = config.insta_defuse;
         explode_no_time = config.explode_no_time;

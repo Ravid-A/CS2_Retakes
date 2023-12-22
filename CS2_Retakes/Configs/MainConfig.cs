@@ -9,6 +9,7 @@ public class MainConfig
     public int MAX_PLAYERS { get; init; } = 9;
     public int MIN_PLAYERS { get; init; } = 2;
     public int ROUND_TIME { get; init; } = 12;
+    public bool auto_plant { get; init; } = true;
     public bool insta_plant { get; init; } = true;
     public bool insta_defuse { get; init; } = true;
     public bool explode_no_time { get; init; } = true;

@@ -1,7 +1,10 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
 
 using static Retakes.Core;
+using static Retakes.Functions;
+using static Retakes.DefuseLogic;
 
 namespace Retakes;
 
@@ -10,6 +13,25 @@ public class PlantLogic
     public static void PlantLogic_OnLoad()
     {
         
+    }
+
+    public static void PlantLogic_OnRoundFreezeEnd()
+    {
+        CPlantedC4 planted_c4 = GetPlantedC4();
+        if (planted_c4 == null!)
+        {
+            //CreateNaturalPlantedC4();
+        }
+    }
+
+    public static void PlantLogic_OnClientDisconnect(CCSPlayerController client)
+    {
+        if (GetPlanter() != client || !FreezePeriod)
+        {
+            return;
+        }
+
+        //CreateNaturalPlantedC4();
     }
 
     public static void PlantLogic_OnBeginPlant(CCSPlayerController player)
@@ -42,6 +64,43 @@ public class PlantLogic
         {
             NotifyRoundFreezeEnd();
         }
+    }
+
+    private static bool CreateNaturalPlantedC4()
+    {
+        if (!main_config.auto_plant)
+        {
+            return false;
+        }
+
+        CCSPlayerController planter = GetPlanter();
+        if (planter == null! || !planter.IsValid)
+        {
+            return false;
+        }
+
+        Vector plant_origin = planter.AbsOrigin!;
+
+        CPlantedC4 planted_c4 = Utilities.CreateEntityByName<CPlantedC4>("planted_c4")!;
+
+        if (planted_c4 == null!)
+        {
+            return false;
+        }
+
+        planted_c4.DispatchSpawn();
+
+        _plugin.AddTimer(0.05f, () =>
+        {
+            planted_c4.Teleport(plant_origin, new(0f, 0f, 0f), new(0f, 0f, 0f));
+            planted_c4.BombTicking = true;
+        });
+
+        RemoveBombWeapons(planter);
+
+        NotifyBombPlanted(planter);
+
+        return true;
     }
 
     private static void ForceC4Plant(CC4 weapon_c4)
@@ -98,5 +157,11 @@ public class PlantLogic
         }
 
         return c4;
+    }
+
+    // Removes any 'weapon_c4' entities.
+    private static void RemoveBombWeapons(CCSPlayerController player)
+    {
+        Utilities.RemoveItemByDesignerName(player, "weapon_c4");
     }
 }
