@@ -28,9 +28,9 @@ public class DBConfig
 
 public class ConnectionConfig
 {
-    public required string Host { get; init; }
-    public required string Database { get; init; }
-    public required string User { get; init; }
-    public required string Password { get; init; }
-    public required uint Port { get; init; }
+    public string Host { get; init; } = string.Empty;
+    public string Database { get; init; } = string.Empty;
+    public string User { get; init; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
+    public uint Port { get; init; } = 3306;
 }

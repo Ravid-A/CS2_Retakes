@@ -12,10 +12,8 @@ public class SpawnsConfig
 {
     public List<SpawnConfig> Spawns {get; set;} = null!;
 
-    public void ConvertToSpawnPoints(string configpath)
+    public void ConvertToSpawnPoints()
     {
-        spawnPoints.spawnsPath = configpath;
-
         int counter = 0;
 
         foreach (var spawn in Spawns)
@@ -28,8 +26,6 @@ public class SpawnsConfig
 
             spawnPoints.AddSpawn(new Spawn(counter++, spawn.position, spawn.angles, spawn.team, spawn.site, spawn.isBombsite));
         }
-
-        PrintToServer($"Loaded {spawnPoints.spawns.Count} spawns");
     }
 
     public static void ConvertFromSpawnPoints()
@@ -63,8 +59,8 @@ public class SpawnsConfig
 
 public class SpawnConfig
 {
-    public string position { get; init;} = "0 5 0";
-    public string angles { get; init;} = "0 6 0";
+    public string position { get; init;} = string.Empty;
+    public string angles { get; init;} = string.Empty;
     public int team { get; init;} = (int)CsTeam.None;
     public int site { get; init;} = (int)Site.A;
     public bool isBombsite { get; init;} = false;
