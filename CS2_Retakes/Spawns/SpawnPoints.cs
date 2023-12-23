@@ -191,7 +191,11 @@ public class SpawnPoints
             return SelectSpawn(player);
         }
 
-        Console.WriteLine($"Spawn: {spawn.team} | Player: {player.GetTeam()} | Site: {spawn.site} | Player: {player.isBomberOwner}");
+        if(main_config.DEBUG)
+        {
+            PrintToServer($"Spawn: {spawn.team} | Player: {player.GetTeam()} | Site: {spawn.site} | Player: {player.isBomberOwner}");
+        }
+
         if(spawn.team != player.GetTeam() || spawn.site != currentSite || spawn.isBombsite != player.isBomberOwner)
         {
             return SelectSpawn(player);
