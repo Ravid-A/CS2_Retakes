@@ -38,14 +38,11 @@ public class Spawn
     {
         this.id = id;
 
-        if(position == string.Empty || angles == string.Empty)
-            ThrowError("Invalid spawn position or angles");
+        StringToFloatVector(position, out float[] pos);
+        this.position = new Vector(pos[0], pos[1], pos[2]);
 
-        string[] position_array = position.Split(" ");
-        this.position = new Vector(float.Parse(position_array[0]), float.Parse(position_array[1]), float.Parse(position_array[2]));
-
-        string[] angles_array = angles.Split(" ");
-        this.angles = new QAngle(float.Parse(angles_array[0]), float.Parse(angles_array[1]), float.Parse(angles_array[2]));
+        StringToFloatVector(angles, out float[] ang);
+        this.angles = new QAngle(ang[0], ang[1], ang[2]);
 
         this.team = (CsTeam)team;
         this.site = (Site)site;
@@ -54,14 +51,11 @@ public class Spawn
 
     public Spawn(string position, string angles, int team = (int)CsTeam.None, int site = (int)Site.A, bool isBombsite = false)
     {
-        if(position == string.Empty || angles == string.Empty)
-            ThrowError("Invalid spawn position or angles");
+        StringToFloatVector(position, out float[] pos);
+        this.position = new Vector(pos[0], pos[1], pos[2]);
 
-        string[] position_array = position.Split(" ");
-        this.position = new Vector(float.Parse(position_array[0]), float.Parse(position_array[1]), float.Parse(position_array[2]));
-
-        string[] angles_array = angles.Split(" ");
-        this.angles = new QAngle(float.Parse(angles_array[0]), float.Parse(angles_array[1]), float.Parse(angles_array[2]));
+        StringToFloatVector(angles, out float[] ang);
+        this.angles = new QAngle(ang[0], ang[1], ang[2]);
 
         this.team = (CsTeam)team;
         this.site = (Site)site;

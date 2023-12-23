@@ -1,3 +1,4 @@
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.Modules.Menu;
@@ -6,6 +7,7 @@ using static Retakes.Core;
 using static Retakes.Functions;
 using Retakes;
 
+using static Configs.Configs;
 using static Configs.SpawnsConfig;
 
 namespace Spawns;
@@ -22,6 +24,20 @@ public class SpawnPoints
     }
 
     public int Length => spawns.Count;
+
+    public void BuildPath()
+    {
+        CreateConfigsDirectory();
+
+        var configDir = Path.Combine(_plugin.ModuleDirectory, $"configs/spawns");
+
+        if (!Directory.Exists(configDir))
+        {
+            Directory.CreateDirectory(configDir);
+        }
+
+        spawnsPath = Path.Combine(_plugin.ModuleDirectory, $"configs/spawns/{Server.MapName}.json");
+    }
 
     public void SetSpawnId(int index, int id)
     {

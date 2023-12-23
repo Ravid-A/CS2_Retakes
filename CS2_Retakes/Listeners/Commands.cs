@@ -12,6 +12,7 @@ using static Retakes.Functions;
 using static Weapons.WeaponsMenu;
 
 using static Configs.Configs;
+using static Configs.SpawnsConfig;
 
 namespace Retakes;
 
@@ -24,6 +25,7 @@ class CommandsHandlers
         _plugin.AddCommand("css_removespawn", "Removes a spawn", RemoveSpawnCommand);
         _plugin.AddCommand("css_spawnlist", "Shows the spawn list", SpawnListCommand);
         _plugin.AddCommand("css_reloadspawns", "Reloads the spawns", ReloadSpawnsCommand);
+        _plugin.AddCommand("css_savespawnstofile", "Saves the spawns to file", SaveSpawnsToFileCommand);
     }
 
     public static void UnRegisterCommands()
@@ -33,6 +35,7 @@ class CommandsHandlers
         _plugin.RemoveCommand("css_removespawn", RemoveSpawnCommand);
         _plugin.RemoveCommand("css_spawnlist", SpawnListCommand);
         _plugin.RemoveCommand("css_reloadspawns", ReloadSpawnsCommand);
+        _plugin.RemoveCommand("css_savespawnstofile", SaveSpawnsToFileCommand);
     }
 
     private static void GunsCommand(CCSPlayerController? player, CommandInfo commandinfo)
@@ -228,5 +231,29 @@ class CommandsHandlers
 
         LoadSpawns(Server.MapName);
         ReplyToCommand(info, $"{PREFIX} Successfully reloaded the spawns.");
+    }
+
+    private static void SaveSpawnsToFileCommand(CCSPlayerController? player, CommandInfo info)
+    {
+        if(player == null)
+        {
+            ReplyToCommand(info, $"{PREFIX} This command can only be executed by a player.");
+            return;
+        }
+
+        if(!player.IsValid)
+        {
+            ReplyToCommand(info, $"{PREFIX} This command can only be executed by a valid player.");
+            return;
+        }
+
+        if(!AdminManager.PlayerHasPermissions(player, "@css/root"))
+        {
+            ReplyToCommand(info, $"{PREFIX} You do not have permission to execute this command.");
+            return;
+        }
+
+        ConvertFromSpawnPoints();
+        ReplyToCommand(info, $"{PREFIX} Successfully saved the spawns to file.");
     }
 }

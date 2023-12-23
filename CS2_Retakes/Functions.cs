@@ -137,4 +137,23 @@ class Functions
 
         return null!;
     }
+
+    public static void StringToFloatVector(string str, out float[] vec)
+    {
+        if(str == string.Empty)
+            ThrowError("Invalid vector string");
+
+        string[] str_array = str.Split(" ");
+
+        if(str_array.Length != 3)
+            ThrowError("Invalid vector string");
+
+        vec = new float[3];
+
+        for (int i = 0; i < str_array.Length; i++)
+        {
+            if(!float.TryParse(str_array[i], out vec[i]))
+                ThrowError("Invalid vector string");
+        }
+    }
 }
