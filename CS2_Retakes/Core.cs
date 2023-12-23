@@ -208,7 +208,7 @@ public class Core : BasePlugin
             }
         }
 
-        PrintToServer($"Loaded {spawnPoints.spawns.Count} spawns");
+        PrintToServer($"Loaded {spawnPoints.Length} spawns");
     }
 
     public static void SQL_FetchUser_CB(MySqlDataReader reader, Exception exception, dynamic data)

@@ -26,6 +26,8 @@ public class SpawnsConfig
 
             spawnPoints.AddSpawn(new Spawn(counter++, spawn.position, spawn.angles, spawn.team, spawn.site, spawn.isBombsite));
         }
+
+        PrintToServer($"Loaded {spawnPoints.Length} spawns");
     }
 
     public static void ConvertFromSpawnPoints()
