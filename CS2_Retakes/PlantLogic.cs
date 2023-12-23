@@ -81,6 +81,11 @@ public class PlantLogic
             return false;
         }
 
+        if(planter.PlayerPawn!.Value!.InBombZone)
+        {
+            return false;
+        }
+
         Vector playerOrigin = planter.PlayerPawn!.Value!.AbsOrigin!;
 
         if(playerOrigin == null!)

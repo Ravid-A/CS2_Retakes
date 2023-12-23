@@ -174,7 +174,7 @@ public class SpawnPoints
 
         player.selectSpawnCallCount++;
 
-        if(player.selectSpawnCallCount >= 25)
+        if(player.selectSpawnCallCount >= 100)
         {
             return null!;
         }
@@ -193,7 +193,7 @@ public class SpawnPoints
 
         if(main_config.DEBUG)
         {
-            PrintToServer($"Spawn: {spawn.team} | Player: {player.GetTeam()} | Site: {spawn.site} | Player: {player.isBomberOwner}");
+            PrintToServer($"Spawn: {spawn.team} | Player: {player.GetTeam()} | Site: {spawn.site} | BombSite: {spawn.isBombsite} | Player: {player.isBomberOwner}");
         }
 
         if(spawn.team != player.GetTeam() || spawn.site != currentSite || spawn.isBombsite != player.isBomberOwner)

@@ -43,37 +43,36 @@ class EventsHandlers
 
         selectedSpawns.Clear();
 
-        List<int> ts_players = new List<int>();
-        List<int> ct_players = new List<int>();
+        List<uint> ts_players = new List<uint>();
+        List<uint> cts_players = new List<uint>();
 
-        for(int i = 0; i < players.Count; i++)
+        foreach(CCSPlayerController player in  Utilities.GetPlayers())
         {
-            Player player = players[i];
-             if(player == null! || !player.IsValid())
+            if(player == null! || !player.IsValid)
             {
                 continue;
             }
 
-            if(player.GetTeam() == CsTeam.Terrorist)
+            if(player.TeamNum == (byte)CsTeam.Terrorist)
             {
-                ts_players.Add(i);
+                ts_players.Add(player.Index);
             }
 
-            if(player.GetTeam() == CsTeam.CounterTerrorist)
+            if(player.TeamNum == (byte)CsTeam.CounterTerrorist)
             {
-                ct_players.Add(i);
+                cts_players.Add(player.Index);
             }
         }
 
         bombOwner = -1;
         if(ts_players.Count >= 1)
         {
-            int player_index = ts_players[new Random().Next(0, ts_players.Count)];
-            bombOwner = player_index;
+            int player_index = (int)ts_players[new Random().Next(0, ts_players.Count)];
+            bombOwner = FindPlayerByPlayerIndex(player_index);
         }
 
         numT = ts_players.Count;
-        numCT = ct_players.Count;
+        numCT = cts_players.Count;
 
         activePlayers = numCT + numT;
 
@@ -90,7 +89,7 @@ class EventsHandlers
         }
 
         
-        PrintToChatAll($"{PREFIX} Retake \x04{(currentSite == Site.A ? "A" : "B")}\x01: \x07{numT} Ts \x01vs \x0E{numCT} CTs");
+        PrintToChatAll($"{PREFIX} Retake \x04{(currentSite == Site.A ? "A" : "B")}\x01: \x07{numT} Ts \x01vs \x0B{numCT} CTs");
         return HookResult.Continue;
     }
 

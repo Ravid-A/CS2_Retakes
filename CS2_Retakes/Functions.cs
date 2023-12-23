@@ -71,6 +71,19 @@ class Functions
         return players.IndexOf(player);
     }
 
+    public static int FindPlayerByPlayerIndex(int playerIndex)
+    {
+        foreach(Player player in players)
+        {
+            if(player.player.Index == playerIndex)
+            {
+                return FindPlayer(player);
+            }
+        }
+
+        return -1;
+    }
+
     public static void ServerCommand(string command, params object[] args)
     {
         Server.ExecuteCommand(string.Format(command, args));
