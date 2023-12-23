@@ -18,7 +18,7 @@ public class SpawnsConfig
 
         foreach (var spawn in Spawns)
         {
-            if(spawn.position == string.Empty || spawn.angles == string.Empty)
+            if(!IsVectorStringValid(spawn.position) || !IsVectorStringValid(spawn.angles))
             {
                 PrintToServer($"Invalid spawn: Position: \"{spawn.position}\", Angles: \"{spawn.angles}\", Team: {spawn.team}, Site: {spawn.site}, isBombsite: {spawn.isBombsite} | SKIPPING...", ConsoleColor.Red);
                 continue;

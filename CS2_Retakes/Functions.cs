@@ -156,4 +156,23 @@ class Functions
                 ThrowError("Invalid vector string");
         }
     }
+
+    public static bool IsVectorStringValid(string str)
+    {
+        if(str == string.Empty)
+            return false;
+
+        string[] str_array = str.Split(" ");
+
+        if(str_array.Length != 3)
+            return false;
+
+        for (int i = 0; i < str_array.Length; i++)
+        {
+            if(!float.TryParse(str_array[i], out float _))
+                return false;
+        }
+
+        return true;
+    }
 }
