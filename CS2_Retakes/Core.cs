@@ -238,7 +238,7 @@ public class Core : BasePlugin
         } else{
             Player player = players[data];
 
-            db.Query(SQL_CheckForErrors, $"INSERT INTO `weapons` (`auth`, `name`, `t_primary`, `ct_primary`, `secondary`, `give_awp`) VALUES ('{player.GetSteamID2()}', '{player.GetName()}' , '0', '0', '0', '0')");
+            db.Query(SQL_CheckForErrors, $"INSERT INTO `weapons` (`auth`, `t_primary`, `ct_primary`, `secondary`, `give_awp`) VALUES ('{player.GetSteamID2()}' , '0', '0', '0', '0')");
         }
     }
 }
