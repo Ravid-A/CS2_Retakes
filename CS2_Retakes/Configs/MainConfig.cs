@@ -13,6 +13,7 @@ public class MainConfig
     public bool insta_plant { get; init; } = true;
     public bool insta_defuse { get; init; } = true;
     public bool explode_no_time { get; init; } = true;
+    public float TerrroristRatio { get; init; } = 0.45f;
 
     public MainConfig(PREFIXS prefixs)
     {

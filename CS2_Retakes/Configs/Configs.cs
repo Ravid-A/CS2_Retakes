@@ -27,6 +27,8 @@ public class Config
     public bool insta_defuse = true;
     public bool explode_no_time = true;
 
+    public float TerrroristRatio = 0.45f;
+
     public Config(MainConfig config)
     {
         PREFIX = config.prefixs.PREFIX;
@@ -42,6 +44,7 @@ public class Config
         insta_plant = config.insta_plant;
         insta_defuse = config.insta_defuse;
         explode_no_time = config.explode_no_time;
+        TerrroristRatio = config.TerrroristRatio;
     }
 }
 
