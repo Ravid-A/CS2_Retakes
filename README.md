@@ -1,5 +1,8 @@
 ## CS2_Reatakes
 
+This project has been archived due to no need of it<br>
+You can use this [Retakes](https://github.com/B3none/cs2-retakes) plugin by [B3none](https://github.com/B3none)
+
 Retakes plugin written in C# (.Net) for CounterStrikeSharp
 
 ## Progress
